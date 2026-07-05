@@ -12,6 +12,7 @@ export default function Page() {
         </div>
         <div className="font-mono text-xs text-muted-foreground">
           (Press <kbd>d</kbd> to toggle dark mode)
+          {/* Remove this comment */}
         </div>
       </div>
     </div>
