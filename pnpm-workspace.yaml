@@ -4,3 +4,8 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   msw: false
+  '@prisma/engines': true
+  bufferutil: true
+  esbuild: true
+  prisma: true
+  utf-8-validate: true

@@ -1,0 +1,328 @@
+{
+  "address": "HfCAZbYdhJqg5bbccTeJLT93krNbPY6zggsErEGAtnqw",
+  "metadata": {
+    "name": "investment_escrow",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "9jaFounders investment escrow program"
+  },
+  "instructions": [
+    {
+      "name": "initialize_escrow",
+      "discriminator": [
+        243,
+        160,
+        77,
+        153,
+        11,
+        92,
+        48,
+        209
+      ],
+      "accounts": [
+        {
+          "name": "investor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "founder"
+        },
+        {
+          "name": "milestone_authority"
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "investor"
+              },
+              {
+                "kind": "arg",
+                "path": "investment_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "investment_id",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "release_milestone_funds",
+      "discriminator": [
+        44,
+        226,
+        97,
+        240,
+        228,
+        187,
+        163,
+        115
+      ],
+      "accounts": [
+        {
+          "name": "milestone_authority",
+          "signer": true,
+          "relations": [
+            "escrow"
+          ]
+        },
+        {
+          "name": "founder",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        }
+      ],
+      "args": [
+        {
+          "name": "release_amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "EscrowState",
+      "discriminator": [
+        19,
+        90,
+        148,
+        111,
+        55,
+        130,
+        229,
+        108
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "EscrowInitialized",
+      "discriminator": [
+        222,
+        186,
+        157,
+        47,
+        145,
+        142,
+        176,
+        248
+      ]
+    },
+    {
+      "name": "MilestoneFundsReleased",
+      "discriminator": [
+        222,
+        23,
+        250,
+        143,
+        182,
+        152,
+        202,
+        77
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidInvestmentId",
+      "msg": "Investment ID is required."
+    },
+    {
+      "code": 6001,
+      "name": "InvestmentIdTooLong",
+      "msg": "Investment ID is too long."
+    },
+    {
+      "code": 6002,
+      "name": "InvalidAmount",
+      "msg": "Amount must be greater than zero."
+    },
+    {
+      "code": 6003,
+      "name": "EscrowNotFunded",
+      "msg": "Escrow is not funded."
+    },
+    {
+      "code": 6004,
+      "name": "ReleaseExceedsEscrow",
+      "msg": "Release amount exceeds escrow amount."
+    },
+    {
+      "code": 6005,
+      "name": "InsufficientEscrowBalance",
+      "msg": "Escrow balance is too low."
+    },
+    {
+      "code": 6006,
+      "name": "InvalidMilestoneAuthority",
+      "msg": "Invalid milestone authority."
+    },
+    {
+      "code": 6007,
+      "name": "InvalidFounder",
+      "msg": "Invalid founder account."
+    },
+    {
+      "code": 6008,
+      "name": "MathOverflow",
+      "msg": "Math overflow."
+    }
+  ],
+  "types": [
+    {
+      "name": "EscrowInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "investor",
+            "type": "pubkey"
+          },
+          {
+            "name": "founder",
+            "type": "pubkey"
+          },
+          {
+            "name": "investment_id",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EscrowState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "investment_id",
+            "type": "string"
+          },
+          {
+            "name": "investor",
+            "type": "pubkey"
+          },
+          {
+            "name": "founder",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "released_amount",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "EscrowStatus"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EscrowStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Funded"
+          },
+          {
+            "name": "Released"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneFundsReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "founder",
+            "type": "pubkey"
+          },
+          {
+            "name": "investment_id",
+            "type": "string"
+          },
+          {
+            "name": "release_amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_released",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "EscrowStatus"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
