@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
-import { getEscrowPda } from "@/hooks/use-escrow";
+import { getEscrowPda } from "@/lib/escrow";
 
 type TransactionHistoryProps = {
   investmentId: string;
@@ -109,7 +109,11 @@ export function TransactionHistory({
   }, [connection, escrowAddress, investmentId, investorWalletAddress]);
 
   React.useEffect(() => {
-    void loadTransactions();
+    const timeout = window.setTimeout(() => {
+      void loadTransactions();
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [loadTransactions]);
 
   return (

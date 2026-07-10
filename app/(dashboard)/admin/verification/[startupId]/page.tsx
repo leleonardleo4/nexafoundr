@@ -5,7 +5,6 @@ import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 
 import { VerificationReviewActions } from "@/components/admin/verification-review-actions";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
 import { getDashboardPath, isDashboardRole } from "@/lib/utils";
@@ -90,15 +89,13 @@ export default async function AdminVerificationReviewPage({
   return (
     <div className="space-y-8">
       <div>
-        <Button
-          asChild
-          className="bg-zinc-100 text-zinc-950 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700"
+        <Link
+          href="/admin"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-100 px-4 text-sm font-medium text-zinc-950 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700"
         >
-          <Link href="/admin">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to admin
-          </Link>
-        </Button>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to admin
+        </Link>
       </div>
 
       <section className="flex flex-col gap-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60 lg:flex-row lg:items-end lg:justify-between">
@@ -241,12 +238,15 @@ function DocumentReviewItem({
           </div>
         </div>
         {href ? (
-          <Button asChild className="shrink-0">
-            <a href={href} target="_blank" rel="noreferrer">
-              Open
-              <ExternalLink className="ml-2 h-4 w-4" />
-            </a>
-          </Button>
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-black px-4 text-sm font-medium text-white transition-colors hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
+          >
+            Open
+            <ExternalLink className="ml-2 h-4 w-4" />
+          </a>
         ) : null}
       </div>
     </div>

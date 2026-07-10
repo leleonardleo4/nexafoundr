@@ -303,7 +303,7 @@ export async function createInvestment(startupId: string, amount: number) {
       startupId: startup.id,
       investorId: investor.id,
       amount: parsedInvestment.amount,
-      status: "PENDING",
+      status: "PENDING_DEPOSIT",
     },
   });
 
@@ -312,6 +312,134 @@ export async function createInvestment(startupId: string, amount: number) {
   revalidatePath(`/investor/startups/${startup.id}`);
 
   return investment;
+}
+
+type FinalizeInvestmentFundingInput = {
+  investmentId: string;
+  escrowAddress: string;
+  investorWalletAddress: string;
+  creditedLamports: string;
+  founderWalletAddress?: string | null;
+  milestoneAuthorityAddress?: string | null;
+};
+
+export async function finalizeInvestmentFunding({
+  investmentId,
+  escrowAddress,
+  investorWalletAddress,
+  creditedLamports,
+  founderWalletAddress,
+  milestoneAuthorityAddress,
+}: FinalizeInvestmentFundingInput) {
+  if (!investmentId) {
+    throw new Error("An investment is required.");
+  }
+
+  if (!escrowAddress) {
+    throw new Error("An escrow address is required.");
+  }
+
+  if (!investorWalletAddress) {
+    throw new Error("An investor wallet address is required.");
+  }
+
+  const parsedCreditedLamports = BigInt(creditedLamports);
+
+  if (parsedCreditedLamports <= BigInt(0)) {
+    throw new Error("A valid credited lamport amount is required.");
+  }
+
+  const requestHeaders = await headers();
+  const session = await auth.api.getSession({ headers: requestHeaders });
+
+  if (!session) {
+    throw new Error("You must be signed in to update this investment.");
+  }
+
+  const investor = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      id: true,
+      role: true,
+    },
+  });
+
+  if (!investor || !isDashboardRole(investor.role) || investor.role !== "INVESTOR") {
+    throw new Error("Only investors can confirm funding.");
+  }
+
+  const investment = await prisma.investment.findUnique({
+    where: {
+      id: investmentId,
+    },
+    select: {
+      id: true,
+      investorId: true,
+      status: true,
+      startupId: true,
+      amount: true,
+      startup: {
+        select: {
+          verificationStatus: true,
+          founderId: true,
+        },
+      },
+    },
+  });
+
+  if (!investment) {
+    throw new Error("Investment not found.");
+  }
+
+  if (investment.investorId !== investor.id) {
+    throw new Error("You can only confirm your own investment.");
+  }
+
+  if (investment.startup.verificationStatus !== "VERIFIED") {
+    throw new Error("Only verified startups can receive investments.");
+  }
+
+  if (investment.status !== "PENDING_DEPOSIT") {
+    throw new Error("Only investments awaiting deposit can be confirmed.");
+  }
+
+  const updatedInvestment = await prisma.investment.update({
+    where: {
+      id: investment.id,
+    },
+    data: {
+      status: "FUNDED",
+      escrowAddress,
+      investorWalletAddress,
+      founderWalletAddress: founderWalletAddress?.trim() || null,
+      milestoneAuthorityAddress: milestoneAuthorityAddress?.trim() || null,
+    },
+  });
+
+  await prisma.founderWalletBalance.upsert({
+    where: {
+      founderId: investment.startup.founderId,
+    },
+    create: {
+      founderId: investment.startup.founderId,
+      creditedLamports: parsedCreditedLamports,
+    },
+    update: {
+      creditedLamports: {
+        increment: parsedCreditedLamports,
+      },
+    },
+  });
+
+  revalidatePath("/investor");
+  revalidatePath("/investor/investments");
+  revalidatePath(`/investor/startups/${investment.startupId}`);
+  revalidatePath("/founder");
+  revalidatePath("/founder/investments");
+
+  return updatedInvestment;
 }
 
 export async function toggleSavedStartup(startupId: string) {

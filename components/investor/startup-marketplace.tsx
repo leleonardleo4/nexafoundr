@@ -41,42 +41,48 @@ export function StartupMarketplace({
 
   React.useEffect(() => {
     let active = true;
+    const timeout = window.setTimeout(() => {
+      if (!active) {
+        return;
+      }
 
-    setIsSearching(true);
+      setIsSearching(true);
 
-    searchVerifiedStartups({
-      name,
-      industry,
-      stage,
-    })
-      .then((startups) => {
-        if (!active) {
-          return;
-        }
-
-        setResults(startups);
+      searchVerifiedStartups({
+        name,
+        industry,
+        stage,
       })
-      .catch((error) => {
-        if (!active) {
-          return;
-        }
+        .then((startups) => {
+          if (!active) {
+            return;
+          }
 
-        toast({
-          title: "Search failed",
-          description: error instanceof Error ? error.message : "Please try again.",
-          variant: "destructive",
+          setResults(startups);
+        })
+        .catch((error) => {
+          if (!active) {
+            return;
+          }
+
+          toast({
+            title: "Search failed",
+            description: error instanceof Error ? error.message : "Please try again.",
+            variant: "destructive",
+          });
+        })
+        .finally(() => {
+          if (!active) {
+            return;
+          }
+
+          setIsSearching(false);
         });
-      })
-      .finally(() => {
-        if (!active) {
-          return;
-        }
-
-        setIsSearching(false);
-      });
+    }, 0);
 
     return () => {
       active = false;
+      window.clearTimeout(timeout);
     };
   }, [name, industry, stage]);
 

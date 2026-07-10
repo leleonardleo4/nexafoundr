@@ -7,9 +7,9 @@ import {
   WalletProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { getSolanaRpcEndpoint } from "@/lib/solana-endpoint";
 
 type SolanaProviderProps = {
   children: React.ReactNode;
@@ -17,21 +17,7 @@ type SolanaProviderProps = {
 
 export function SolanaProvider({ children }: SolanaProviderProps) {
   const endpoint = React.useMemo(
-    () => {
-      const configuredEndpoint = process.env.NEXT_PUBLIC_SOLANA_RPC_URL?.trim();
-
-      if (configuredEndpoint) {
-        return configuredEndpoint;
-      }
-
-      return clusterApiUrl(
-        process.env.NEXT_PUBLIC_SOLANA_CLUSTER === "mainnet-beta"
-          ? "mainnet-beta"
-          : process.env.NEXT_PUBLIC_SOLANA_CLUSTER === "testnet"
-            ? "testnet"
-            : "devnet",
-      );
-    },
+    () => getSolanaRpcEndpoint(),
     [],
   );
   const wallets = React.useMemo(() => [new PhantomWalletAdapter()], []);

@@ -50,7 +50,7 @@ export function TopNav({ user, onMenuClick }: TopNavProps) {
 
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500 md:hidden">
-              9jaFounders
+              nexafoundr
             </p>
             <h2 className="truncate text-lg font-semibold text-zinc-950 dark:text-zinc-50">
               {user.role === "FOUNDER"

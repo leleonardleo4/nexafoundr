@@ -8,8 +8,8 @@ import { PublicKey } from "@solana/web3.js";
 
 import {
   createInvestmentEscrowProgram,
-  getInvestmentEscrowProgramId,
 } from "@/lib/anchor-client";
+import { getEscrowPda } from "@/lib/escrow";
 
 type EscrowAmount = number | string | bigint;
 
@@ -87,17 +87,6 @@ function resolveMethod(methods: unknown, ...names: string[]) {
   }
 
   return method;
-}
-
-export function getEscrowPda(investor: PublicKey, investmentId: string) {
-  return PublicKey.findProgramAddressSync(
-    [
-      new TextEncoder().encode("escrow"),
-      investor.toBuffer(),
-      new TextEncoder().encode(investmentId),
-    ],
-    getInvestmentEscrowProgramId(),
-  );
 }
 
 export function useEscrow() {

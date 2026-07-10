@@ -6,7 +6,7 @@ export default function Home() {
       <div className="w-full max-w-5xl space-y-8">
         <div className="space-y-3 text-center">
           <p className="text-sm font-medium uppercase tracking-[0.24em] text-neutral-500">
-            9jaFounders
+            nexafoundr
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-white sm:text-4xl">
             Join the founder and investor network

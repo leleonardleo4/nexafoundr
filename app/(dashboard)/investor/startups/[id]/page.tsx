@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { InvestNowForm } from "@/components/investments/invest-now-form";
+import { ConnectionRequestCard } from "@/components/investor/connection-request-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +49,7 @@ type StartupDetailPageProps = {
 };
 
 export default async function StartupDetailPage({ params }: StartupDetailPageProps) {
-  await getInvestorUser();
+  const investor = await getInvestorUser();
   const { id } = await params;
 
   const startup = await prisma.startup.findUnique({
@@ -58,7 +59,9 @@ export default async function StartupDetailPage({ params }: StartupDetailPagePro
     include: {
       founder: {
         select: {
+          id: true,
           name: true,
+          founderWalletAddress: true,
         },
       },
     },
@@ -67,6 +70,19 @@ export default async function StartupDetailPage({ params }: StartupDetailPagePro
   if (!startup || startup.verificationStatus !== "VERIFIED") {
     notFound();
   }
+
+  const existingConversation = await prisma.conversation.findUnique({
+    where: {
+      founderId_investorId: {
+        founderId: startup.founder.id,
+        investorId: investor.id,
+      },
+    },
+    select: {
+      id: true,
+      status: true,
+    },
+  });
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
@@ -156,9 +172,44 @@ export default async function StartupDetailPage({ params }: StartupDetailPagePro
               </div>
             </div>
 
-            <InvestNowForm startupId={startup.id} fundingRequired={startup.fundingRequired} />
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/40">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+                  Founder wallet
+                </p>
+                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                  {startup.founder.founderWalletAddress
+                    ? "Escrow can route directly to the founder."
+                    : "Wallet not linked yet. Funding will stay in pending deposit until it is added."}
+                </p>
+              </div>
+
+              <Badge
+                className={
+                  startup.founder.founderWalletAddress
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+                }
+              >
+                {startup.founder.founderWalletAddress ? "Linked" : "Missing"}
+              </Badge>
+            </div>
+
+            <InvestNowForm
+              startupId={startup.id}
+              fundingRequired={startup.fundingRequired}
+              founderAddress={startup.founder.founderWalletAddress}
+              milestoneAuthorityAddress={process.env.NEXT_PUBLIC_ESCROW_MILESTONE_AUTHORITY ?? null}
+            />
           </CardContent>
         </Card>
+
+        <ConnectionRequestCard
+          startupId={startup.id}
+          startupName={startup.name}
+          conversationId={existingConversation?.id ?? null}
+          conversationStatus={existingConversation?.status ?? null}
+        />
       </aside>
     </div>
   );

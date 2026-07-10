@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   ChartColumn,
   LayoutDashboard,
+  MessageSquare,
   Rocket,
   Settings,
   X,
@@ -22,12 +23,14 @@ type SidebarProps = {
 const navigationMap = {
   FOUNDER: [
     { href: "/founder", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/founder/startups", label: "Startups", icon: Rocket },
     { href: "/founder/investments", label: "Investments", icon: ChartColumn },
     { href: "/settings", label: "Settings", icon: Settings },
   ],
   INVESTOR: [
     { href: "/investor", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/messages", label: "Messages", icon: MessageSquare },
     { href: "/investor/startups", label: "Startups", icon: Rocket },
     { href: "/investor/investments", label: "Investments", icon: ChartColumn },
     { href: "/settings", label: "Settings", icon: Settings },
@@ -67,7 +70,7 @@ export function Sidebar({ role, open, onClose }: SidebarProps) {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500">
-                  9jaFounders
+                  nexafoundr
                 </p>
                 <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
                   Dashboard
@@ -113,7 +116,7 @@ function SidebarContent({ role, pathname, navigationItems, onNavigate }: Sidebar
     <>
       <div className="mb-8 space-y-1">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500">
-          9jaFounders
+          nexafoundr
         </p>
         <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
           {role === "FOUNDER"

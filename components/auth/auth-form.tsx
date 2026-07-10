@@ -109,7 +109,7 @@ export function AuthForm({ type }: AuthFormProps) {
         </h2>
         <p className="text-sm text-neutral-500">
           {isSignup
-            ? "Sign up to get started with 9jaFounders."
+            ? "Sign up to get started with nexafoundr."
             : "Sign in to continue where you left off."}
         </p>
       </div>

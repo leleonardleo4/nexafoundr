@@ -78,10 +78,14 @@ export function WalletTestPanel() {
     } finally {
       setIsFetchingBalance(false);
     }
-  }, [connection, toast, wallet.publicKey]);
+  }, [connection, wallet.publicKey]);
 
   React.useEffect(() => {
-    void refreshBalance();
+    const timeout = window.setTimeout(() => {
+      void refreshBalance();
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [refreshBalance]);
 
   const sendTestTransaction = async () => {

@@ -3,10 +3,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { StartupVerificationForm } from "@/components/founder/startup-verification-form";
+import { ConnectionRequestsSection } from "@/components/founder/connection-requests-section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { auth } from "@/lib/auth";
+import { formatSolAmount } from "@/lib/funding";
 import { getDashboardPath, isDashboardRole } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
@@ -64,13 +66,68 @@ export default async function FounderDashboardPage() {
     },
   });
 
+  const founderBalance = await prisma.founderWalletBalance.findUnique({
+    where: {
+      founderId: user.id,
+    },
+    select: {
+      creditedLamports: true,
+    },
+  });
+
+  const connectionRequests = await prisma.conversation.findMany({
+    where: {
+      founderId: user.id,
+      status: "PENDING",
+    },
+    include: {
+      investor: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  const activeConversations = await prisma.conversation.findMany({
+    where: {
+      founderId: user.id,
+      status: "ACTIVE",
+    },
+    include: {
+      investor: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+      startup: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+
   const totalFundingRequested = startups.reduce(
     (total, startup) => total + startup.fundingRequired,
     0,
   );
   const activeInvestments = investments.filter(
-    (investment) => investment.status === "PENDING" || investment.status === "FUNDED",
+    (investment) =>
+      investment.status === "PENDING" ||
+      investment.status === "PENDING_DEPOSIT" ||
+      investment.status === "FUNDED",
   ).length;
+  const creditedCapital = founderBalance?.creditedLamports ?? BigInt(0);
   const startupStatusSummary = startups.length
     ? `${startups.filter((startup) => startup.verificationStatus === "VERIFIED").length} verified / ${startups.filter((startup) => startup.verificationStatus === "PENDING").length} pending`
     : "No listings yet";
@@ -110,6 +167,50 @@ export default async function FounderDashboardPage() {
         </CardContent>
       </Card>
 
+      <ConnectionRequestsSection requests={connectionRequests} />
+
+      <Card>
+        <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Active conversations</CardTitle>
+            <CardDescription>
+              Open a room to continue discussions with investors after approval.
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {activeConversations.length > 0 ? (
+            <div className="space-y-4">
+              {activeConversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className="flex flex-col gap-4 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 lg:flex-row lg:items-center lg:justify-between"
+                >
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                      {conversation.startup?.name ?? "Direct conversation"}
+                    </p>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      Investor: {conversation.investor.name} · {conversation.investor.email}
+                    </p>
+                  </div>
+
+                  <Button asChild>
+                    <Link href={`/messages/${conversation.id}`}>Open chat room</Link>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
+              <p className="text-sm text-zinc-500">
+                No active conversations yet.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -117,7 +218,7 @@ export default async function FounderDashboardPage() {
         </TabsList>
 
         <TabsContent value="overview">
-          <section className="grid gap-4 md:grid-cols-3">
+          <section className="grid gap-4 md:grid-cols-4">
             {[
               {
                 label: "Total Funding Requested",
@@ -133,6 +234,12 @@ export default async function FounderDashboardPage() {
                 label: "Startup Status",
                 value: startupStatusSummary,
                 description: "A quick view of your verification mix.",
+              },
+              {
+                label: "Credited Balance",
+                value: formatSolAmount(creditedCapital),
+                description:
+                  "Funds that are already recorded in the platform balance ledger.",
               },
             ].map((item) => (
               <Card key={item.label}>

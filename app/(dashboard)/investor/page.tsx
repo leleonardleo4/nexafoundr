@@ -72,6 +72,32 @@ export default async function InvestorDashboardPage() {
     take: 4,
   });
 
+  const conversations = await prisma.conversation.findMany({
+    where: {
+      investorId: user.id,
+    },
+    select: {
+      id: true,
+      status: true,
+      updatedAt: true,
+      founder: {
+        select: {
+          name: true,
+        },
+      },
+      startup: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    take: 5,
+  });
+
   const totalCapitalCommitted = investments.reduce(
     (total, investment) => total + investment.amount,
     0,
@@ -109,11 +135,12 @@ export default async function InvestorDashboardPage() {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
           <TabsTrigger value="recommended">Recommended Startups</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
-          <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3">
             {[
               {
                 label: "Total Capital Committed",
@@ -142,6 +169,60 @@ export default async function InvestorDashboardPage() {
               </Card>
             ))}
           </section>
+        </TabsContent>
+
+        <TabsContent value="messages">
+          <Card>
+            <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle>Recent conversations</CardTitle>
+                <CardDescription>
+                  Keep track of the founders you have connected with.
+                </CardDescription>
+              </div>
+
+              <Button asChild className="bg-zinc-200 text-zinc-950 hover:bg-zinc-300 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200">
+                <Link href="/messages">Open inbox</Link>
+              </Button>
+            </CardHeader>
+
+            <CardContent>
+              {conversations.length > 0 ? (
+                <div className="space-y-4">
+                  {conversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      className="flex flex-col gap-4 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 lg:flex-row lg:items-center lg:justify-between"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                          {conversation.startup?.name ?? conversation.founder.name}
+                        </p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                          Founder: {conversation.founder.name}
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          Status: {conversation.status}
+                        </p>
+                      </div>
+
+                      <Button asChild>
+                        <Link href={`/messages/${conversation.id}`}>
+                          {conversation.status === "ACTIVE" ? "Open chat room" : "Review request"}
+                        </Link>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
+                  <p className="text-sm text-zinc-500">
+                    No conversations yet. Connect with a founder to get started.
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="recommended">

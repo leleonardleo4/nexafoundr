@@ -17,7 +17,7 @@ import { auth } from "@/lib/auth";
 import { getDashboardPath, isDashboardRole } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { MilestoneApprovalList } from "@/components/solana/milestone-approval-list";
-import { TransactionHistory } from "@/components/solana/transaction-history";
+import { ProjectOverview } from "@/components/investor/project-overview";
 
 async function getInvestorUser() {
   const requestHeaders = await headers();
@@ -56,28 +56,31 @@ export default async function InvestorInvestmentsPage() {
       investorId: user.id,
     },
     include: {
-      startup: {
-        select: {
-          id: true,
-          name: true,
-          industry: true,
-          stage: true,
+        startup: {
+          select: {
+            id: true,
+            name: true,
+            industry: true,
+            stage: true,
+            fundingRequired: true,
+          },
+        },
+        milestones: {
+          orderBy: {
+            createdAt: "asc",
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            amountLamports: true,
+            status: true,
+            dueDate: true,
+            approvedAt: true,
+            releasedAt: true,
+          },
         },
       },
-      milestones: {
-        orderBy: {
-          createdAt: "asc",
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          amountLamports: true,
-          status: true,
-          dueDate: true,
-        },
-      },
-    },
     orderBy: {
       id: "desc",
     },
@@ -128,7 +131,7 @@ export default async function InvestorInvestmentsPage() {
         <CardHeader>
           <CardTitle>Investment records</CardTitle>
           <CardDescription>
-            Your pending, funded, and released commitments.
+            Your pending-deposit, funded, and released commitments.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -155,14 +158,24 @@ export default async function InvestorInvestmentsPage() {
                       <Badge>{investment.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        asChild
-                        className="h-9 bg-zinc-100 px-3 text-zinc-950 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700"
-                      >
-                        <Link href={`/investor/startups/${investment.startup.id}`}>
-                          View
-                        </Link>
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          asChild
+                          className="h-9 bg-zinc-100 px-3 text-zinc-950 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700"
+                        >
+                          <Link href={`/investor/startups/${investment.startup.id}`}>
+                            View
+                          </Link>
+                        </Button>
+                        <Button
+                          asChild
+                          className="h-9 bg-zinc-950 px-3 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                        >
+                          <Link href={`/investor/startups/${investment.startup.id}`}>
+                            Revisit startup
+                          </Link>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -185,28 +198,32 @@ export default async function InvestorInvestmentsPage() {
         <section className="space-y-6">
           {investments.map((investment) => (
             <div key={investment.id} className="space-y-4">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
-                  {investment.startup.name}
+              <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+                    {investment.startup.name}
+                  </p>
+                  <h2 className="mt-1 text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+                    Escrow controls
+                  </h2>
+                </div>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  Review the live funding progress, deposit state, and milestone ledger
+                  for this project.
                 </p>
-                <h2 className="mt-1 text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-                  Escrow controls
-                </h2>
               </div>
 
-              <MilestoneApprovalList
-                investmentId={investment.id}
-                founderAddress={investment.founderWalletAddress}
-                investorWalletAddress={investment.investorWalletAddress}
-                escrowAddress={investment.escrowAddress}
-                milestones={investment.milestones}
-              />
+              <div className="grid gap-6 xl:grid-cols-[1.35fr_0.95fr]">
+                <ProjectOverview investment={investment} />
 
-              <TransactionHistory
-                investmentId={investment.id}
-                investorWalletAddress={investment.investorWalletAddress}
-                escrowAddress={investment.escrowAddress}
-              />
+                <MilestoneApprovalList
+                  investmentId={investment.id}
+                  founderAddress={investment.founderWalletAddress}
+                  investorWalletAddress={investment.investorWalletAddress}
+                  escrowAddress={investment.escrowAddress}
+                  milestones={investment.milestones}
+                />
+              </div>
             </div>
           ))}
         </section>

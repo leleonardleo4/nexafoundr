@@ -46,6 +46,7 @@ export async function GET(
       id: true,
       founderId: true,
       investorId: true,
+      status: true,
     },
   });
 
@@ -58,6 +59,13 @@ export async function GET(
 
   if (user.role !== "ADMIN" && !isParticipant) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (conversation.status !== "ACTIVE" && user.role !== "ADMIN") {
+    return NextResponse.json(
+      { error: "Conversation is not active yet." },
+      { status: 409 },
+    );
   }
 
   const messages = await prisma.message.findMany({

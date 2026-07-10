@@ -5,6 +5,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useEscrow } from "@/hooks/use-escrow";
+import { estimateSolFromNgn, ngnToLamports } from "@/lib/funding";
 
 type FundingButtonProps = {
   investmentId: string;
@@ -25,6 +26,7 @@ export function FundingButton({
   className,
 }: FundingButtonProps) {
   const { connected, deposit, isPending } = useEscrow();
+  const estimatedSol = estimateSolFromNgn(amount);
 
   async function handleFund() {
     if (!milestoneAuthorityAddress) {
@@ -38,16 +40,19 @@ export function FundingButton({
     }
 
     try {
+      const amountLamports = ngnToLamports(amount);
       const result = await deposit({
         investmentId,
-        amount,
+        amount: amountLamports,
         founderAddress,
         milestoneAuthorityAddress,
       });
 
       toast({
         title: "Funds locked in escrow",
-        description: `Signature: ${result.signature.slice(0, 12)}...${result.signature.slice(-8)}`,
+        description: estimatedSol
+          ? `Signature: ${result.signature.slice(0, 12)}...${result.signature.slice(-8)}. Estimated transfer: ${estimatedSol}.`
+          : `Signature: ${result.signature.slice(0, 12)}...${result.signature.slice(-8)}`,
       });
     } catch (error) {
       toast({
@@ -68,7 +73,7 @@ export function FundingButton({
       disabled={!connected || isPending}
       onClick={handleFund}
     >
-      {isPending ? "Locking funds..." : "Fund Escrow"}
+      {isPending ? "Funding..." : connected ? "Fund" : "Connect wallet"}
     </Button>
   );
 }

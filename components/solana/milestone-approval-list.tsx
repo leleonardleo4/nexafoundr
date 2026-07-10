@@ -11,14 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { toast } from "@/components/ui/use-toast";
 import { useEscrow } from "@/hooks/use-escrow";
 
@@ -29,6 +21,8 @@ type Milestone = {
   amountLamports: string;
   status: string;
   dueDate: Date | string | null;
+  approvedAt?: Date | string | null;
+  releasedAt?: Date | string | null;
 };
 
 type MilestoneApprovalListProps = {
@@ -49,6 +43,33 @@ function formatLamports(value: string) {
   return `${(lamports / 1_000_000_000).toLocaleString(undefined, {
     maximumFractionDigits: 6,
   })} SOL`;
+}
+
+function formatDate(value: Date | string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+  }).format(date);
+}
+
+function getStatusTone(status: string) {
+  switch (status) {
+    case "APPROVED":
+      return "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300";
+    case "RELEASED":
+      return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300";
+    default:
+      return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300";
+  }
 }
 
 export function MilestoneApprovalList({
@@ -115,58 +136,66 @@ export function MilestoneApprovalList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Milestone approvals</CardTitle>
+        <CardTitle>Milestone approval</CardTitle>
         <CardDescription>
-          Approve milestone releases from the deployed Devnet escrow program.
+          Review each milestone status and release funds when the delivery is ready.
         </CardDescription>
       </CardHeader>
       <CardContent>
         {milestones.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Milestone</TableHead>
-                <TableHead>Release</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {milestones.map((milestone) => {
-                const rowPending =
-                  isPending && pendingMilestoneId === milestone.id;
-                const canApprove = milestone.status !== "RELEASED";
+          <div className="space-y-4">
+            {milestones.map((milestone) => {
+              const rowPending = isPending && pendingMilestoneId === milestone.id;
+              const canApprove = milestone.status !== "RELEASED";
+              const dueDate = formatDate(milestone.dueDate);
+              const approvedAt = formatDate(milestone.approvedAt);
+              const releasedAt = formatDate(milestone.releasedAt);
 
-                return (
-                  <TableRow key={milestone.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{milestone.title}</p>
-                        {milestone.description ? (
-                          <p className="text-xs text-zinc-500">
-                            {milestone.description}
-                          </p>
-                        ) : null}
+              return (
+                <div
+                  key={milestone.id}
+                  className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-950/40"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h4 className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                          {milestone.title}
+                        </h4>
+                        <Badge className={getStatusTone(milestone.status)}>
+                          {milestone.status}
+                        </Badge>
                       </div>
-                    </TableCell>
-                    <TableCell>{formatLamports(milestone.amountLamports)}</TableCell>
-                    <TableCell>
-                      <Badge>{milestone.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
+
+                      {milestone.description ? (
+                        <p className="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                          {milestone.description}
+                        </p>
+                      ) : null}
+
+                      <div className="flex flex-wrap gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+                        <span>Release: {formatLamports(milestone.amountLamports)}</span>
+                        {dueDate ? <span>Due: {dueDate}</span> : null}
+                        {approvedAt ? <span>Approved: {approvedAt}</span> : null}
+                        {releasedAt ? <span>Released: {releasedAt}</span> : null}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
                       <Button
                         type="button"
-                        disabled={!connected || rowPending || !canApprove}
+                        disabled={!connected || isPending || !canApprove}
                         onClick={() => handleApprove(milestone)}
+                        className="whitespace-nowrap"
                       >
                         {rowPending ? "Approving..." : "Approve"}
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <div className="rounded-md border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
             <p className="text-sm text-zinc-500">

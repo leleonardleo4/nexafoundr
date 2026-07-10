@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       },
       select: {
         id: true,
+        founderId: true,
         verificationStatus: true,
       },
     });
@@ -64,12 +65,19 @@ export async function POST(request: Request) {
       );
     }
 
+    if (startup.founderId === user.id) {
+      return NextResponse.json(
+        { error: "You cannot invest in your own startup." },
+        { status: 400 },
+      );
+    }
+
     const investment = await prisma.investment.create({
       data: {
         startupId: startup.id,
         investorId: user.id,
         amount: body.amount,
-        status: "PENDING",
+        status: "PENDING_DEPOSIT",
       },
     });
 
