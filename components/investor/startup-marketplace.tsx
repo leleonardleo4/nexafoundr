@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Bookmark, Search } from "lucide-react";
+import { BookmarkCheck, BookmarkMinus, Search } from "lucide-react";
 
 import { searchVerifiedStartups, toggleSavedStartup } from "@/app/actions/startup";
 import { Badge } from "@/components/ui/badge";
@@ -168,16 +168,19 @@ export function StartupMarketplace({
                       disabled={savePending}
                       onClick={() => handleSaveToggle(startup.id)}
                       className={[
-                        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+                        "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                         saved
                           ? "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950"
                           : "border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:hover:text-zinc-50",
                       ].join(" ")}
                       aria-label={saved ? "Remove saved startup" : "Save startup"}
                     >
-                      <Bookmark
-                        className={["h-4 w-4", saved ? "fill-current" : ""].join(" ")}
-                      />
+                      {saved ? (
+                        <BookmarkMinus className="h-4 w-4" />
+                      ) : (
+                        <BookmarkCheck className="h-4 w-4" />
+                      )}
+                      <span>{saved ? "Saved" : "Save"}</span>
                     </button>
                   </div>
                   <CardDescription

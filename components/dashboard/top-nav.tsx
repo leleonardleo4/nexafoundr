@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Menu, LogOut, Bell } from "lucide-react";
+import { ChevronDown, Menu, LogOut, Bell } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 import { WalletConnectButton } from "@/components/solana/wallet-connect-button";
@@ -42,10 +42,11 @@ export function TopNav({ user, onMenuClick }: TopNavProps) {
           <button
             type="button"
             onClick={onMenuClick}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950 md:hidden dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950 md:hidden dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
             aria-label="Open menu"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-4 w-4" />
+            Menu
           </button>
 
           <div className="min-w-0">
@@ -69,12 +70,15 @@ export function TopNav({ user, onMenuClick }: TopNavProps) {
 
           <button
             type="button"
-            className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
+            className="relative inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 shadow-sm transition hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
             aria-label={`Notifications (${notifications})`}
           >
-            <Bell className="h-5 w-5" />
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">Alerts</span>
             {notifications > 0 ? (
-              <span className="absolute right-1 top-1 inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1.5 text-[10px] font-semibold text-white">
+                {notifications}
+              </span>
             ) : null}
           </button>
 
@@ -83,6 +87,7 @@ export function TopNav({ user, onMenuClick }: TopNavProps) {
               <button
                 type="button"
                 className="flex items-center gap-3 rounded-full border border-zinc-200 bg-white px-3 py-2 shadow-sm transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900"
+                aria-label="Open account menu"
               >
                 {user.profileImage ? (
                   <Image
@@ -107,6 +112,7 @@ export function TopNav({ user, onMenuClick }: TopNavProps) {
                   <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">{user.name}</p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">{user.email}</p>
                 </div>
+                <ChevronDown className="hidden h-4 w-4 text-zinc-400 sm:block" />
               </button>
             </DropdownMenuTrigger>
 
