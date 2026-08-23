@@ -67,7 +67,7 @@ export function Toaster() {
             "rounded-lg border p-4 shadow-lg backdrop-blur",
             toastItem.variant === "destructive"
               ? "border-red-200 bg-red-50 text-red-950"
-              : "border-neutral-200 bg-white text-foreground dark:border-neutral-800 dark:bg-zinc-950",
+              : "border-[color:var(--border)] bg-[color:var(--surface-strong)] text-[color:var(--foreground)]",
           ].join(" ")}
         >
           <div className="flex items-start justify-between gap-4">

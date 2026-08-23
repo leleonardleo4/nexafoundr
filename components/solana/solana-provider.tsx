@@ -1,14 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-
-import "@solana/wallet-adapter-react-ui/styles.css";
 import { getSolanaRpcEndpoint } from "@/lib/solana-endpoint";
 
 type SolanaProviderProps = {
@@ -20,12 +16,11 @@ export function SolanaProvider({ children }: SolanaProviderProps) {
     () => getSolanaRpcEndpoint(),
     [],
   );
-  const wallets = React.useMemo(() => [new PhantomWalletAdapter()], []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{children}</WalletModalProvider>
+      <WalletProvider wallets={[]}> 
+        {children}
       </WalletProvider>
     </ConnectionProvider>
   );

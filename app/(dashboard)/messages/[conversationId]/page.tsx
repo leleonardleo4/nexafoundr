@@ -1,40 +1,13 @@
 import Link from "next/link";
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { ConversationRoom } from "@/components/messaging/conversation-room";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { getDashboardPath } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
-
-async function getDashboardUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  return user;
-}
 
 type ConversationPageProps = {
   params: Promise<{
@@ -43,7 +16,7 @@ type ConversationPageProps = {
 };
 
 export default async function ConversationPage({ params }: ConversationPageProps) {
-  const user = await getDashboardUser();
+  const user = await requireDashboardSessionUser();
   const { conversationId } = await params;
 
   const conversation = await prisma.conversation.findUnique({
@@ -124,15 +97,15 @@ export default async function ConversationPage({ params }: ConversationPageProps
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60 lg:flex-row lg:items-end lg:justify-between">
+      <section className="flex flex-col gap-4 rounded-3xl border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
+          <p className="text-sm uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
             Private conversation
           </p>
-          <h1 className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
+          <h1 className="mt-2 text-3xl font-semibold text-[color:var(--foreground)]">
             {roomTitle}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 max-w-2xl text-sm text-[color:var(--muted-foreground)]">
             {roomDescription}
           </p>
         </div>
@@ -142,7 +115,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
           {conversation.startup ? (
             <Button
               asChild
-              className="bg-zinc-200 text-zinc-950 hover:bg-zinc-300 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
+              className="bg-[color:var(--secondary)] text-[color:var(--secondary-foreground)] hover:bg-[color:var(--secondary-hover)]"
             >
               <Link href={`/investor/startups/${conversation.startup.id}`}>
                 View startup
@@ -162,29 +135,29 @@ export default async function ConversationPage({ params }: ConversationPageProps
             <CardTitle>Who is in this room</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Founder</p>
-              <p className="mt-2 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">Founder</p>
+              <p className="mt-2 text-sm font-medium text-[color:var(--foreground)]">
                 {conversation.founder.name}
               </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm text-[color:var(--muted-foreground)]">
                 {conversation.founder.email}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Investor</p>
-              <p className="mt-2 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+            <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">Investor</p>
+              <p className="mt-2 text-sm font-medium text-[color:var(--foreground)]">
                 {conversation.investor.name}
               </p>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="text-sm text-[color:var(--muted-foreground)]">
                 {conversation.investor.email}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Created</p>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">Created</p>
+              <p className="mt-2 text-sm text-[color:var(--muted-foreground)]">
                 {new Intl.DateTimeFormat(undefined, {
                   dateStyle: "medium",
                   timeStyle: "short",

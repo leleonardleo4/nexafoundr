@@ -1,47 +1,41 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
+import { getDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
-import { isDashboardRole } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
-    const requestHeaders = await headers();
-    const session = await auth.api.getSession({ headers: requestHeaders });
+    const user = await getDashboardSessionUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
-      select: {
-        id: true,
-        role: true,
-      },
-    });
-
-    if (!user || !isDashboardRole(user.role) || user.role !== "INVESTOR") {
+    if (user.role !== "INVESTOR") {
       return NextResponse.json(
         { error: "Only investors can create investment records." },
         { status: 403 },
       );
     }
 
-    const body = (await request.json()) as {
-      startupId?: string;
-      amount?: number;
-    };
+  const body = (await request.json()) as {
+    startupId?: string;
+    amount?: number;
+    investorWalletAddress?: string;
+  };
 
-    if (!body.startupId || !body.amount || Number.isNaN(body.amount) || body.amount <= 0) {
-      return NextResponse.json(
-        { error: "A valid startup and investment amount are required." },
-        { status: 400 },
-      );
-    }
+  if (
+    !body.startupId ||
+    !body.amount ||
+    Number.isNaN(body.amount) ||
+    body.amount <= 0 ||
+    !body.investorWalletAddress?.trim()
+  ) {
+    return NextResponse.json(
+      { error: "A valid startup, wallet address, and investment amount are required." },
+      { status: 400 },
+    );
+  }
 
     const startup = await prisma.startup.findUnique({
       where: {
@@ -78,6 +72,7 @@ export async function POST(request: Request) {
         investorId: user.id,
         amount: body.amount,
         status: "PENDING_DEPOSIT",
+        investorWalletAddress: body.investorWalletAddress.trim(),
       },
     });
 

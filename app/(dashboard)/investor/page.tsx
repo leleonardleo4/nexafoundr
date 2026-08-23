@@ -1,46 +1,13 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
 
-async function getInvestorUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "INVESTOR") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user;
-}
-
 export default async function InvestorDashboardPage() {
-  const user = await getInvestorUser();
+  const user = await requireDashboardSessionUser("INVESTOR");
 
   const investments = await prisma.investment.findMany({
     where: {
@@ -140,11 +107,11 @@ export default async function InvestorDashboardPage() {
         </TabsList>
 
         <TabsContent value="overview">
-      <section className="grid gap-4 md:grid-cols-3">
+          <section className="grid gap-4 md:grid-cols-3">
             {[
               {
                 label: "Total Capital Committed",
-                value: `NGN ${totalCapitalCommitted.toLocaleString()}`,
+                value: `USD ${totalCapitalCommitted.toLocaleString()}`,
                 description: "Total capital across every investment record.",
               },
               {
@@ -263,7 +230,7 @@ export default async function InvestorDashboardPage() {
                       </div>
 
                       <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                        Funding required: NGN {startup.fundingRequired.toLocaleString()}
+                        Funding required: USD {startup.fundingRequired.toLocaleString()}
                       </p>
 
                       <div className="mt-4">
@@ -288,4 +255,3 @@ export default async function InvestorDashboardPage() {
     </div>
   );
 }
-

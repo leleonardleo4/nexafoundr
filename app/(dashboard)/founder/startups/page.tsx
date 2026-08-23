@@ -1,45 +1,13 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
 
-async function getFounderUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "FOUNDER") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user;
-}
-
 export default async function FounderStartupsPage() {
-  const user = await getFounderUser();
+  const user = await requireDashboardSessionUser("FOUNDER");
 
   const startups = await prisma.startup.findMany({
     where: {
@@ -94,7 +62,7 @@ export default async function FounderStartupsPage() {
                   <div>
                     <p className="text-zinc-500">Funding goal</p>
                     <p className="font-medium text-zinc-950 dark:text-zinc-50">
-                      NGN {startup.fundingRequired.toLocaleString()}
+                      USD {startup.fundingRequired.toLocaleString()}
                     </p>
                   </div>
                   <div>

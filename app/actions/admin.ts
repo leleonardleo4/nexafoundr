@@ -1,12 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
+import { getDashboardSessionUser } from "@/lib/dashboard-session";
 import { notifyFounderVerificationStatus } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
-import { isAdminRole } from "@/lib/utils";
 import { verificationStatusSchema } from "@/lib/validations";
 
 async function updateStartupVerificationStatus(
@@ -14,23 +12,13 @@ async function updateStartupVerificationStatus(
   verificationStatus: "VERIFIED" | "REJECTED",
 ) {
   const parsedVerificationStatus = verificationStatusSchema.parse(verificationStatus);
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
+  const user = await getDashboardSessionUser();
 
-  if (!session) {
+  if (!user) {
     throw new Error("You must be signed in as an admin.");
   }
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      role: true,
-    },
-  });
-
-  if (!user || !isAdminRole(user.role)) {
+  if (user.role !== "ADMIN") {
     throw new Error("Only admins can update verification status.");
   }
 

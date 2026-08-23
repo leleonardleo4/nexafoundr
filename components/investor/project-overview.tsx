@@ -30,7 +30,7 @@ type ProjectOverviewProps = {
 function formatCurrency(value: number) {
   return new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: "NGN",
+    currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
 }
@@ -48,7 +48,7 @@ function getStatusTone(status: string) {
     case "FUNDED":
       return "border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300";
     case "RELEASED":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300";
+      return "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-300";
     case "PENDING_DEPOSIT":
     default:
       return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300";
@@ -91,7 +91,7 @@ export function ProjectOverview({ investment }: ProjectOverviewProps) {
 
             <div className="h-3 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-lime-400 to-amber-300"
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-400 to-fuchsia-300"
                 style={{ width: `${progress}%` }}
               />
             </div>

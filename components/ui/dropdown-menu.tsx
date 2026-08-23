@@ -39,13 +39,27 @@ export function DropdownMenuTrigger({
   const { open, setOpen } = useDropdownMenuContext();
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<{ onClick?: () => void }>, {
-      onClick: () => setOpen(!open),
-    });
+    return React.cloneElement(
+      children as React.ReactElement<{
+        onClick?: () => void;
+        "aria-haspopup"?: string;
+        "aria-expanded"?: boolean;
+      }>,
+      {
+        onClick: () => setOpen(!open),
+        "aria-haspopup": "menu",
+        "aria-expanded": open,
+      },
+    );
   }
 
   return (
-    <button type="button" onClick={() => setOpen(!open)}>
+    <button
+      type="button"
+      onClick={() => setOpen(!open)}
+      aria-haspopup="menu"
+      aria-expanded={open}
+    >
       {children}
     </button>
   );
@@ -84,7 +98,7 @@ export function DropdownMenuContent({
   return (
     <div
       data-dropdown-menu-root="true"
-      className={`absolute top-full z-50 mt-2 w-56 rounded-2xl border border-zinc-200 bg-white p-2 shadow-lg shadow-zinc-950/5 dark:border-zinc-800 dark:bg-zinc-900 ${
+      className={`absolute top-full z-50 mt-2 w-56 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-2 shadow-[0_20px_50px_-28px_rgba(15,23,42,0.35)] backdrop-blur ${
         align === "end" ? "right-0" : "left-0"
       }`}
     >
@@ -95,12 +109,12 @@ export function DropdownMenuContent({
 
 export function DropdownMenuLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-3 py-2 text-sm font-medium text-zinc-500">{children}</div>
+    <div className="px-3 py-2 text-sm font-medium text-[color:var(--muted-foreground)]">{children}</div>
   );
 }
 
 export function DropdownMenuSeparator() {
-  return <div className="my-2 h-px bg-zinc-200 dark:bg-zinc-800" />;
+  return <div className="my-2 h-px bg-[color:var(--border)]" />;
 }
 
 export function DropdownMenuItem({
@@ -121,7 +135,7 @@ export function DropdownMenuItem({
         onClick?.();
         setOpen(false);
       }}
-      className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm text-zinc-700 transition hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 ${className}`}
+      className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm text-[color:var(--foreground)] transition hover:bg-[color:var(--surface)] ${className}`}
     >
       {children}
     </button>

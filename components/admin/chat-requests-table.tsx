@@ -36,16 +36,17 @@ type ChatRequestsTableProps = {
 };
 
 function formatDate(value: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: "UTC",
   }).format(value);
 }
 
 function getStatusClassName(status: string) {
   switch (status) {
     case "ACTIVE":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300";
+      return "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-300";
     case "PENDING":
       return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300";
     case "CLOSED":
@@ -138,7 +139,7 @@ export function ChatRequestsTable({ requests }: ChatRequestsTableProps) {
                     <div className="flex justify-end gap-2">
                       <Button
                         type="button"
-                        className="bg-emerald-600 text-white hover:bg-emerald-500 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+                        className="bg-violet-600 text-white hover:bg-violet-500 dark:bg-violet-500 dark:text-zinc-950 dark:hover:bg-violet-400"
                         disabled={isBusy || request.status !== "PENDING"}
                         onClick={() => handleRequest("accept", request.id)}
                       >

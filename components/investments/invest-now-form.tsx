@@ -38,8 +38,12 @@ export function InvestNowForm({
     setIsLoading(true);
 
     try {
+      if (!connected || !publicKey) {
+        throw new Error("Connect your wallet to fund this startup.");
+      }
+
       const amountLamports = ngnToLamports(amountNgn);
-      const investment = await createInvestment(startupId, amountNgn);
+      const investment = await createInvestment(startupId, amountNgn, publicKey.toBase58());
 
       if (!founderAddress || !milestoneAuthorityAddress) {
         toast({
@@ -49,10 +53,6 @@ export function InvestNowForm({
         });
         router.refresh();
         return;
-      }
-
-      if (!connected || !publicKey) {
-        throw new Error("Connect your wallet to fund this startup.");
       }
 
       const escrowResult = await deposit({
@@ -97,7 +97,7 @@ export function InvestNowForm({
     >
       <div className="space-y-2">
         <label className="text-sm font-medium text-zinc-950 dark:text-zinc-50" htmlFor="amount">
-          Investment amount (NGN)
+          Investment amount (USD)
         </label>
         <input
           id="amount"

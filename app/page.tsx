@@ -1,147 +1,118 @@
-import { ArrowRight, BadgeCheck, LineChart, MessagesSquare, ShieldCheck, Sparkles } from "lucide-react";
-
-import { AuthForm } from "@/components/auth/auth-form";
-import { Button } from "@/components/ui/button";
-
-const highlights = [
-  {
-    title: "Escrow-first funding",
-    description: "Investors fund verified startups through a clean, traceable Solana flow.",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Founder and investor chat",
-    description: "Private connection requests keep conversations intentional and context-rich.",
-    icon: MessagesSquare,
-  },
-  {
-    title: "Signals that matter",
-    description: "A dashboard that surfaces funding progress, trust, and momentum at a glance.",
-    icon: LineChart,
-  },
-];
-
-const stats = [
-  { value: "Verified", label: "startup onboarding" },
-  { value: "Escrow", label: "funding flow" },
-  { value: "Private", label: "p2p conversations" },
-];
+import Link from "next/link";
+import { ArrowRight, Sparkles, ShieldCheck, Wallet } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f4f1ea] px-4 py-6 text-zinc-950 dark:bg-[#050816] dark:text-zinc-50 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,165,233,0.18),transparent_28%),radial-gradient(circle_at_bottom,rgba(16,185,129,0.14),transparent_32%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.22),transparent_28%),radial-gradient(circle_at_top_right,rgba(16,185,129,0.18),transparent_28%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.65),transparent_40%)]" />
-      <div className="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-black/15 to-transparent dark:via-white/15" />
+    <main className="relative min-h-screen overflow-hidden bg-[color:var(--background)] px-4 py-6 text-[color:var(--foreground)] sm:px-6 lg:px-8">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(20,184,166,0.18),transparent_26%),radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(124,58,237,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0))]" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-px bg-gradient-to-r from-transparent via-[color:var(--border)] to-transparent" />
+      <div className="absolute right-[-8rem] top-1/3 -z-10 h-96 w-96 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.18),transparent_70%)] blur-3xl" />
+      <div className="absolute left-[-7rem] bottom-[-6rem] -z-10 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.14),transparent_70%)] blur-3xl" />
 
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-7xl flex-col justify-center gap-8">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-full border border-white/60 bg-white/70 px-4 py-3 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <div>
-            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.38em] text-slate-500 dark:text-slate-400">
-              NexaFoundr
-            </p>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Built for founder trust, investor clarity, and escrow-backed momentum.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-            <BadgeCheck className="h-4 w-4" />
-            Verified startup pipeline
-          </div>
-        </header>
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-7xl items-center">
+        <div className="grid w-full gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <section className="relative overflow-hidden rounded-[2.25rem] border border-[color:var(--border)] bg-[linear-gradient(160deg,rgba(9,15,31,0.96),rgba(15,23,42,0.9))] p-8 shadow-[0_40px_120px_rgba(15,23,42,0.42)] backdrop-blur-sm sm:p-10 lg:p-12">
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(20,184,166,0.1),transparent_34%,rgba(124,58,237,0.1)_72%,transparent)]" />
+            <div className="absolute -right-16 top-10 h-56 w-56 rounded-full border border-white/10 bg-[radial-gradient(circle,rgba(20,184,166,0.24),transparent_72%)] blur-2xl" />
+            <div className="absolute bottom-0 left-0 h-44 w-44 rounded-full border border-white/10 bg-[radial-gradient(circle,rgba(37,99,235,0.16),transparent_72%)] blur-2xl" />
 
-        <section className="grid items-stretch gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-8">
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-medium text-slate-600 shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                Premium founder-investor infrastructure
-              </div>
+            <div className="relative flex h-full min-h-[34rem] flex-col justify-between gap-10">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.38em] text-white/70">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  NexaFoundr
+                </div>
 
-              <div className="space-y-4">
-                <h1 className="max-w-2xl text-4xl font-semibold tracking-tight text-balance text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
-                  Capital, conversations, and escrow in one clean motion.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg">
-                  NexaFoundr gives verified startups a refined public presence, investors a clear path
-                  to connect, and both sides a more trustworthy way to move from interest to funding.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Button asChild>
-                  <a href="#auth" className="inline-flex items-center gap-2">
-                    Access the platform
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
-                </Button>
-                <Button
-                  asChild
-                  className="border border-slate-300 bg-white text-slate-900 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
-                >
-                  <a href="#highlights">See what is included</a>
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              {stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-[0_20px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5"
-                >
-                  <p className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    {stat.value}
+                <div className="space-y-4">
+                  <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-white text-balance sm:text-5xl lg:text-6xl">
+                    A cleaner path from first sign-in to funded startup.
+                  </h1>
+                  <p className="max-w-xl text-sm leading-7 text-white/72 sm:text-base">
+                    Privy handles the identity layer, Phantom handles the wallet path, and the
+                    dashboard stays focused on building instead of wrestling auth.
                   </p>
-                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{stat.label}</p>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div
-            id="auth"
-            className="rounded-[2rem] border border-white/70 bg-white/75 p-4 shadow-[0_30px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/5 sm:p-6"
-          >
-            <div className="mb-6 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-5 dark:border-white/10 dark:bg-white/5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
-                Member access
+                <div className="flex flex-wrap gap-3">
+                  {["Phantom wallet", "X auth", "Founder dashboards"].map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/80"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  {
+                    icon: Wallet,
+                    title: "Fast entry",
+                    detail: "Phantom and X keep the front door simple.",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "Private by default",
+                    detail: "Sessions stay tied to Privy instead of custom cookie hacks.",
+                  },
+                  {
+                    icon: ArrowRight,
+                    title: "Straight through",
+                    detail: "New users land in the right dashboard immediately after auth.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="rounded-3xl border border-white/10 bg-white/5 p-4 text-white/80 shadow-[0_20px_60px_rgba(2,6,23,0.18)]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white">
+                        <item.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{item.title}</p>
+                        <p className="mt-1 text-xs leading-5 text-white/66">{item.detail}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="relative rounded-[2.25rem] border border-[color:var(--border)] bg-[color:var(--surface)] p-5 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl sm:p-6 lg:p-8">
+            <div className="rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--muted-foreground)]">
+                Start here
               </p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                Sign in or create an account
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-[color:var(--foreground)]">
+                One sign-in. One dashboard.
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Use your existing session, or join as a founder or investor and continue into the
-                right dashboard automatically.
+              <p className="mt-3 text-sm leading-6 text-[color:var(--muted-foreground)]">
+                The new flow is intentionally small: hit login, choose Phantom or X, and move
+                on. No extra setup screens, no weird detours.
               </p>
+
+              <div className="mt-6 grid gap-3">
+                <Link
+                  href="/login"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[color:var(--primary)] px-5 text-sm font-semibold text-[color:var(--primary-foreground)] transition-colors hover:bg-[color:var(--primary-hover)]"
+                >
+                  Open login
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <Link
+                  href="/signup"
+                  className="inline-flex h-11 items-center justify-center rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] px-5 text-sm font-semibold text-[color:var(--foreground)] transition-colors hover:bg-[color:var(--surface-strong)]"
+                >
+                  New here? Start the same clean flow
+                </Link>
+              </div>
             </div>
-
-            <div className="grid gap-4 xl:grid-cols-2">
-              <AuthForm type="login" />
-              <AuthForm type="signup" />
-            </div>
-          </div>
-        </section>
-
-        <section id="highlights" className="grid gap-4 md:grid-cols-3">
-          {highlights.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <article
-                key={item.title}
-                className="rounded-[1.75rem] border border-white/70 bg-white/75 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white dark:bg-white dark:text-slate-950">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  {item.description}
-                </p>
-              </article>
-            );
-          })}
-        </section>
+          </section>
+        </div>
       </div>
     </main>
   );

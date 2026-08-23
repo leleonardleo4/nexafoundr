@@ -1,6 +1,3 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,41 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
 
-async function getFounderUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "FOUNDER") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user;
-}
-
 export default async function FounderInvestmentsPage() {
-  const user = await getFounderUser();
+  const user = await requireDashboardSessionUser("FOUNDER");
 
   const investments = await prisma.investment.findMany({
     where: {
@@ -94,7 +61,7 @@ export default async function FounderInvestmentsPage() {
         <Card>
           <CardHeader>
             <CardDescription>Total committed</CardDescription>
-            <CardTitle>NGN {totalCommitted.toLocaleString()}</CardTitle>
+            <CardTitle>USD {totalCommitted.toLocaleString()}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -133,7 +100,7 @@ export default async function FounderInvestmentsPage() {
                         <p className="text-xs text-zinc-500">{investment.investor.email}</p>
                       </div>
                     </TableCell>
-                    <TableCell>NGN {investment.amount.toLocaleString()}</TableCell>
+                    <TableCell>USD {investment.amount.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge>{investment.status}</Badge>
                     </TableCell>

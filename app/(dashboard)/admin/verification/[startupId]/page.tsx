@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 
 import { VerificationReviewActions } from "@/components/admin/verification-review-actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
 
 type AdminVerificationReviewPageProps = {
@@ -16,36 +14,10 @@ type AdminVerificationReviewPageProps = {
   }>;
 };
 
-async function getAdminUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "ADMIN") {
-    redirect(getDashboardPath(user.role));
-  }
-}
-
 export default async function AdminVerificationReviewPage({
   params,
 }: AdminVerificationReviewPageProps) {
-  await getAdminUser();
+  await requireDashboardSessionUser("ADMIN");
   const { startupId } = await params;
 
   const startup = await prisma.startup.findUnique({
@@ -83,7 +55,7 @@ export default async function AdminVerificationReviewPage({
     teamInformation &&
     "socialLinks" in teamInformation &&
     Array.isArray(teamInformation.socialLinks)
-      ? teamInformation.socialLinks.filter((link): link is string => typeof link === "string")
+      ? teamInformation.socialLinks
       : [];
 
   return (
@@ -134,7 +106,7 @@ export default async function AdminVerificationReviewPage({
         <Card>
           <CardHeader>
             <CardDescription>Funding goal</CardDescription>
-            <CardTitle>NGN {startup.fundingRequired.toLocaleString()}</CardTitle>
+            <CardTitle>USD {startup.fundingRequired.toLocaleString()}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-zinc-500">{startup.equityOffered}% equity offered</p>
@@ -186,9 +158,29 @@ export default async function AdminVerificationReviewPage({
                   Social links
                 </h2>
                 <div className="grid gap-2">
-                  {socialLinks.map((link) => (
-                    <DocumentLink key={link} label={link} href={link} />
-                  ))}
+                  {socialLinks.map((link) => {
+                    if (!link) {
+                      return null;
+                    }
+
+                    if (typeof link === "string") {
+                      return <DocumentLink key={link} label={link} href={link} />;
+                    }
+
+                    if (typeof link !== "object") {
+                      return null;
+                    }
+
+                    const url = "url" in link && typeof link.url === "string" ? link.url : "";
+                    const label =
+                      "platform" in link &&
+                      typeof link.platform === "string" &&
+                      link.platform.trim()
+                        ? link.platform
+                        : url;
+
+                    return <DocumentLink key={`${label}-${url}`} label={label} href={url} />;
+                  })}
                 </div>
               </div>
             ) : null}

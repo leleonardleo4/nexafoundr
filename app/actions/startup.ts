@@ -1,19 +1,51 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-import { auth } from "@/lib/auth";
 import { uploadStartupDocument } from "@/lib/cloudinary";
+import { getDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
-import { isDashboardRole } from "@/lib/utils";
 import {
   investmentSchema,
   startupSchema,
   startupVerificationSchema,
 } from "@/lib/validations";
+
+const ALLOWED_DOCUMENT_EXTENSIONS = new Set([".pdf", ".doc", ".docx", ".rtf", ".odt"]);
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/rtf",
+  "application/vnd.oasis.opendocument.text",
+]);
+
+function isAllowedDocumentFile(file: File) {
+  const fileName = file.name.toLowerCase();
+
+  return (
+    ALLOWED_DOCUMENT_MIME_TYPES.has(file.type) ||
+    Array.from(ALLOWED_DOCUMENT_EXTENSIONS).some((extension) =>
+      fileName.endsWith(extension),
+    )
+  );
+}
+
+async function getCurrentDashboardUser(requiredRole?: "FOUNDER" | "INVESTOR") {
+  const user = await getDashboardSessionUser();
+
+  if (!user) {
+    throw new Error("You must be signed in.");
+  }
+
+  if (requiredRole && user.role !== requiredRole) {
+    throw new Error(`Only ${requiredRole.toLowerCase()}s can perform this action.`);
+  }
+
+  return user;
+}
 
 export async function getVerifiedStartups() {
   return prisma.startup.findMany({
@@ -37,25 +69,7 @@ export async function searchVerifiedStartups({
   industry,
   stage,
 }: StartupSearchFilters) {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    throw new Error("You must be signed in to search startups.");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role) || user.role !== "INVESTOR") {
-    throw new Error("Only investors can search verified startups.");
-  }
+  await getCurrentDashboardUser("INVESTOR");
 
   const where: Prisma.StartupWhereInput = {
     verificationStatus: "VERIFIED",
@@ -117,26 +131,19 @@ function parseStartupListingInput(
 
 export async function createStartupListing(input: StartupListingInput | FormData) {
   const listingInput = parseStartupListingInput(input);
+  const user = await getCurrentDashboardUser("FOUNDER");
 
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    throw new Error("You must be signed in to create a startup listing.");
-  }
-
-  const user = await prisma.user.findUnique({
+  const founderProfile = await prisma.user.findUnique({
     where: {
-      id: session.user.id,
+      id: user.id,
     },
     select: {
-      id: true,
-      role: true,
+      founderWalletAddress: true,
     },
   });
 
-  if (!user || !isDashboardRole(user.role) || user.role !== "FOUNDER") {
-    throw new Error("Only founders can create startup listings.");
+  if (!founderProfile?.founderWalletAddress) {
+    throw new Error("Connect and save your founder wallet before creating a startup listing.");
   }
 
   const startup = await prisma.startup.create({
@@ -177,25 +184,19 @@ export async function submitStartupForVerification(formData: FormData) {
   const pitchDeck = formData.get("pitchDeck");
   const cacRegistration = formData.get("cacRegistration");
 
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
+  const user = await getCurrentDashboardUser("FOUNDER");
 
-  if (!session) {
-    throw new Error("You must be signed in to submit a startup for verification.");
-  }
-
-  const user = await prisma.user.findUnique({
+  const founderProfile = await prisma.user.findUnique({
     where: {
-      id: session.user.id,
+      id: user.id,
     },
     select: {
-      id: true,
-      role: true,
+      founderWalletAddress: true,
     },
   });
 
-  if (!user || !isDashboardRole(user.role) || user.role !== "FOUNDER") {
-    throw new Error("Only founders can submit startups for verification.");
+  if (!founderProfile?.founderWalletAddress) {
+    throw new Error("Connect and save your founder wallet before submitting for verification.");
   }
 
   if (!(pitchDeck instanceof File) || pitchDeck.size === 0) {
@@ -204,6 +205,10 @@ export async function submitStartupForVerification(formData: FormData) {
 
   if (!(cacRegistration instanceof File) || cacRegistration.size === 0) {
     throw new Error("CAC registration upload is required.");
+  }
+
+  if (!isAllowedDocumentFile(cacRegistration)) {
+    throw new Error("CAC registration must be a PDF or document file.");
   }
 
   const startup = await prisma.startup.create({
@@ -247,33 +252,22 @@ export async function submitStartupForVerification(formData: FormData) {
   return startup;
 }
 
-export async function createInvestment(startupId: string, amount: number) {
+export async function createInvestment(
+  startupId: string,
+  amount: number,
+  investorWalletAddress: string,
+) {
   if (!startupId) {
     throw new Error("A startup is required.");
   }
 
+  if (!investorWalletAddress?.trim()) {
+    throw new Error("Connect your wallet before creating an investment.");
+  }
+
   const parsedInvestment = investmentSchema.parse({ amount });
 
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    throw new Error("You must be signed in to invest.");
-  }
-
-  const investor = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!investor || !isDashboardRole(investor.role) || investor.role !== "INVESTOR") {
-    throw new Error("Only investors can create investment records.");
-  }
+  const investor = await getCurrentDashboardUser("INVESTOR");
 
   const startup = await prisma.startup.findUnique({
     where: {
@@ -304,6 +298,7 @@ export async function createInvestment(startupId: string, amount: number) {
       investorId: investor.id,
       amount: parsedInvestment.amount,
       status: "PENDING_DEPOSIT",
+      investorWalletAddress: investorWalletAddress.trim(),
     },
   });
 
@@ -349,26 +344,7 @@ export async function finalizeInvestmentFunding({
     throw new Error("A valid credited lamport amount is required.");
   }
 
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    throw new Error("You must be signed in to update this investment.");
-  }
-
-  const investor = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!investor || !isDashboardRole(investor.role) || investor.role !== "INVESTOR") {
-    throw new Error("Only investors can confirm funding.");
-  }
+  const investor = await getCurrentDashboardUser("INVESTOR");
 
   const investment = await prisma.investment.findUnique({
     where: {
@@ -447,26 +423,7 @@ export async function toggleSavedStartup(startupId: string) {
     throw new Error("A startup is required.");
   }
 
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    throw new Error("You must be signed in to save startups.");
-  }
-
-  const investor = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!investor || !isDashboardRole(investor.role) || investor.role !== "INVESTOR") {
-    throw new Error("Only investors can save startups.");
-  }
+  const investor = await getCurrentDashboardUser("INVESTOR");
 
   const startup = await prisma.startup.findUnique({
     where: {

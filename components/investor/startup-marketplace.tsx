@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { startupIndustries, startupStages } from "@/lib/validations";
 
 type StartupMarketplaceItem = {
   id: string;
@@ -126,9 +127,9 @@ export function StartupMarketplace({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60 md:grid-cols-3">
+      <div className="grid gap-3 rounded-3xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4 shadow-sm backdrop-blur md:grid-cols-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[color:var(--muted-foreground)]" />
           <Input
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -136,20 +137,42 @@ export function StartupMarketplace({
             className="pl-9"
           />
         </div>
-        <Input
+        <label className="sr-only" htmlFor="marketplace-industry">
+          Filter by industry
+        </label>
+        <select
+          id="marketplace-industry"
           value={industry}
           onChange={(event) => setIndustry(event.target.value)}
-          placeholder="Filter by industry"
-        />
-        <Input
+          className="h-11 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
+        >
+          <option value="">All industries</option>
+          {startupIndustries.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <label className="sr-only" htmlFor="marketplace-stage">
+          Filter by stage
+        </label>
+        <select
+          id="marketplace-stage"
           value={stage}
           onChange={(event) => setStage(event.target.value)}
-          placeholder="Filter by stage"
-        />
+          className="h-11 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
+        >
+          <option value="">All stages</option>
+          {startupStages.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
       </div>
 
       {isSearching ? (
-        <p className="text-sm text-zinc-500">Searching verified startups...</p>
+        <p className="text-sm text-[color:var(--muted-foreground)]">Searching verified startups...</p>
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -167,11 +190,11 @@ export function StartupMarketplace({
                       type="button"
                       disabled={savePending}
                       onClick={() => handleSaveToggle(startup.id)}
-                      className={[
+                    className={[
                         "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
                         saved
-                          ? "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950"
-                          : "border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:hover:text-zinc-50",
+                          ? "border-[color:var(--primary)] bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
+                          : "border-[color:var(--border)] text-[color:var(--foreground)] hover:border-[color:var(--primary)]",
                       ].join(" ")}
                       aria-label={saved ? "Remove saved startup" : "Save startup"}
                     >
@@ -200,10 +223,10 @@ export function StartupMarketplace({
                     <Badge>{startup.industry}</Badge>
                     <Badge>{startup.stage}</Badge>
                   </div>
-                  <p className="text-sm text-zinc-500">
-                    Funding goal: NGN {startup.fundingRequired.toLocaleString()}
+                  <p className="text-sm text-[color:var(--muted-foreground)]">
+                    Funding goal: USD {startup.fundingRequired.toLocaleString()}
                   </p>
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-[color:var(--muted-foreground)]">
                     Equity offered: {startup.equityOffered}%
                   </p>
                 </CardContent>
@@ -217,7 +240,7 @@ export function StartupMarketplace({
             );
           })
         ) : (
-          <div className="rounded-3xl border border-dashed border-zinc-300 p-8 text-sm text-zinc-500 dark:border-zinc-700">
+          <div className="rounded-3xl border border-dashed border-[color:var(--border)] p-8 text-sm text-[color:var(--muted-foreground)]">
             No startups match your search.
           </div>
         )}

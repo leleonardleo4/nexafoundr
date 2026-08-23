@@ -61,7 +61,7 @@ export function PendingStartupsTable({ startups }: PendingStartupsTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>{startup.industry}</TableCell>
-                  <TableCell>NGN {startup.fundingRequired.toLocaleString()}</TableCell>
+                  <TableCell>USD {startup.fundingRequired.toLocaleString()}</TableCell>
                   <TableCell>
                     <Badge>Pending</Badge>
                   </TableCell>

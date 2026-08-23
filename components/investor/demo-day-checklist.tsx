@@ -113,7 +113,7 @@ export function DemoDayChecklist({ investmentId }: DemoDayChecklistProps) {
       complete: walletConnected,
         detail: walletConnected
           ? `Connected as ${publicKey?.toBase58()}`
-        : "Connect Phantom to reflect live wallet state.",
+        : "Connect your wallet to reflect live wallet state.",
     },
     {
       title: "Startup Found",
@@ -218,7 +218,7 @@ export function DemoDayChecklist({ investmentId }: DemoDayChecklistProps) {
               className={[
                 "flex flex-col gap-3 rounded-2xl border p-4 transition-colors sm:flex-row sm:items-start sm:justify-between",
                 step.complete
-                  ? "border-emerald-200 bg-emerald-50/80 dark:border-emerald-900 dark:bg-emerald-950/30"
+                  ? "border-violet-200 bg-violet-50/80 dark:border-violet-900 dark:bg-violet-950/30"
                   : "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/50",
               ].join(" ")}
             >
@@ -228,7 +228,7 @@ export function DemoDayChecklist({ investmentId }: DemoDayChecklistProps) {
                     {step.title}
                   </h3>
                   {step.complete ? (
-                    <Badge className="border-emerald-200 bg-emerald-100 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300">
+                    <Badge className="border-violet-200 bg-violet-100 text-violet-700 dark:border-violet-900 dark:bg-violet-950/60 dark:text-violet-300">
                       Complete
                     </Badge>
                   ) : (
@@ -242,7 +242,7 @@ export function DemoDayChecklist({ investmentId }: DemoDayChecklistProps) {
 
               <div className="flex items-center gap-2 text-sm font-medium">
                 {step.complete ? (
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <CheckCircle2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 ) : (
                   <span className="inline-flex h-4 w-4 rounded-full border border-zinc-300 dark:border-zinc-700" />
                 )}

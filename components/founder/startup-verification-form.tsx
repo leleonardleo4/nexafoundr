@@ -9,6 +9,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Steps } from "@/components/ui/steps";
 import { toast } from "@/components/ui/use-toast";
+import { startupIndustries, startupStages } from "@/lib/validations";
+
+const SOCIAL_PLATFORMS = [
+  "X (Twitter)",
+  "Telegram",
+  "LinkedIn",
+  "Instagram",
+  "WhatsApp",
+  "Discord",
+  "YouTube",
+] as const;
+
+const DOC_ACCEPT =
+  ".pdf,.doc,.docx,.rtf,.odt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/rtf,application/vnd.oasis.opendocument.text";
 
 const steps = [
   {
@@ -23,18 +37,23 @@ const steps = [
     title: "Legal Verification",
     description: "CAC registration document.",
   },
-];
+] as const;
+
+type SocialLinkEntry = {
+  platform: (typeof SOCIAL_PLATFORMS)[number];
+  url: string;
+};
 
 type FormState = {
   name: string;
-  industry: string;
+  industry: (typeof startupIndustries)[number] | "";
   websiteUrl: string;
-  stage: string;
+  stage: (typeof startupStages)[number] | "";
   fundingRequired: string;
   equityOffered: string;
   description: string;
   teamInformation: string;
-  socialLinks: string;
+  socialLinks: SocialLinkEntry[];
   pitchDeck: File | null;
   cacRegistration: File | null;
 };
@@ -48,7 +67,7 @@ const initialFormState: FormState = {
   equityOffered: "",
   description: "",
   teamInformation: "",
-  socialLinks: "",
+  socialLinks: SOCIAL_PLATFORMS.map((platform) => ({ platform, url: "" })),
   pitchDeck: null,
   cacRegistration: null,
 };
@@ -67,6 +86,15 @@ export function StartupVerificationForm() {
     }));
   }
 
+  function updateSocialLink(index: number, url: string) {
+    setFormState((current) => ({
+      ...current,
+      socialLinks: current.socialLinks.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, url } : entry,
+      ),
+    }));
+  }
+
   function nextStep() {
     setCurrentStep((step) => Math.min(step + 1, steps.length));
   }
@@ -80,9 +108,11 @@ export function StartupVerificationForm() {
     const teamInformation = {
       summary: formState.teamInformation,
       socialLinks: formState.socialLinks
-        .split("\n")
-        .map((link) => link.trim())
-        .filter(Boolean),
+        .map((entry) => ({
+          platform: entry.platform,
+          url: entry.url.trim(),
+        }))
+        .filter((entry) => entry.url),
     };
 
     formData.set("name", formState.name);
@@ -151,12 +181,24 @@ export function StartupVerificationForm() {
           </Field>
 
           <Field label="Industry" htmlFor="verification-industry">
-            <Input
+            <select
               id="verification-industry"
               required
               value={formState.industry}
-              onChange={(event) => updateField("industry", event.target.value)}
-            />
+              onChange={(event) =>
+                updateField("industry", event.target.value as FormState["industry"])
+              }
+              className="h-11 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)]"
+            >
+              <option value="" disabled className="bg-[color:var(--surface-strong)] text-[color:var(--muted-foreground)]">
+                Select an industry
+              </option>
+              {startupIndustries.map((industry) => (
+                <option key={industry} value={industry} className="bg-[color:var(--surface-strong)] text-[color:var(--foreground)]">
+                  {industry}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <Field label="Website" htmlFor="verification-website">
@@ -171,25 +213,45 @@ export function StartupVerificationForm() {
           </Field>
 
           <Field label="Stage" htmlFor="verification-stage">
-            <Input
+            <select
               id="verification-stage"
               required
-              placeholder="Pre-seed, seed, growth"
               value={formState.stage}
-              onChange={(event) => updateField("stage", event.target.value)}
-            />
+              onChange={(event) =>
+                updateField("stage", event.target.value as FormState["stage"])
+              }
+              className="h-11 w-full rounded-md border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)]"
+            >
+              <option value="" disabled className="bg-[color:var(--surface-strong)] text-[color:var(--muted-foreground)]">
+                Select a stage
+              </option>
+              {startupStages.map((stage) => (
+                <option key={stage} value={stage} className="bg-[color:var(--surface-strong)] text-[color:var(--foreground)]">
+                  {stage}
+                </option>
+              ))}
+            </select>
           </Field>
 
-          <Field label="Funding required" htmlFor="verification-funding">
-            <Input
-              id="verification-funding"
-              type="number"
-              min="1"
-              step="0.01"
-              required
-              value={formState.fundingRequired}
-              onChange={(event) => updateField("fundingRequired", event.target.value)}
-            />
+          <Field label="Funding required (USD)" htmlFor="verification-funding">
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-zinc-500 dark:text-zinc-400">
+                $
+              </span>
+              <Input
+                id="verification-funding"
+                type="number"
+                min="1"
+                step="0.01"
+                required
+                value={formState.fundingRequired}
+                onChange={(event) => updateField("fundingRequired", event.target.value)}
+                className="pl-7"
+              />
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Default currency is USD.
+            </p>
           </Field>
 
           <Field label="Equity offered (%)" htmlFor="verification-equity">
@@ -234,15 +296,34 @@ export function StartupVerificationForm() {
             />
           </Field>
 
-          <Field label="Social links" htmlFor="verification-socials">
-            <Textarea
-              id="verification-socials"
-              rows={3}
-              placeholder="One link per line"
-              value={formState.socialLinks}
-              onChange={(event) => updateField("socialLinks", event.target.value)}
-            />
-          </Field>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                Social links
+              </label>
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                Add the social channels your team actively uses. Leave unused rows blank.
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              {formState.socialLinks.map((entry, index) => (
+                <div
+                  key={entry.platform}
+                  className="grid gap-2 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50 sm:grid-cols-[160px_minmax(0,1fr)] sm:items-center"
+                >
+                  <div className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    {entry.platform}
+                  </div>
+                  <Input
+                    value={entry.url}
+                    onChange={(event) => updateSocialLink(index, event.target.value)}
+                    placeholder={`https://${entry.platform.toLowerCase().replace(/[^a-z0-9]+/g, "")}.com/yourpage`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
           <Field label="Pitch deck upload" htmlFor="verification-pitch-deck">
             <Input
@@ -264,12 +345,15 @@ export function StartupVerificationForm() {
             <Input
               id="verification-cac"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
+              accept={DOC_ACCEPT}
               required
               onChange={(event) =>
                 updateField("cacRegistration", event.target.files?.[0] ?? null)
               }
             />
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Accepted formats: PDF, Word documents, RTF, and ODT files.
+            </p>
           </Field>
 
           <div className="rounded-md border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
@@ -284,7 +368,7 @@ export function StartupVerificationForm() {
           type="button"
           disabled={currentStep === 1 || pending}
           onClick={previousStep}
-          className="bg-zinc-100 text-zinc-950 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700"
+          className="border border-zinc-200 bg-white text-zinc-950 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back

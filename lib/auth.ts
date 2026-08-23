@@ -26,10 +26,20 @@ export const auth = betterAuth({
     disableSignUp: false,
   },
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL:
-    process.env.BETTER_AUTH_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
-    "http://localhost:3000",
+  baseURL: {
+    allowedHosts: [
+      "localhost:3000",
+      "127.0.0.1:3000",
+      "*.ngrok-free.dev",
+      "*.ngrok-free.app",
+      "demandarryl.site",
+      "*.demandarryl.site",
+    ],
+    fallback:
+      process.env.BETTER_AUTH_URL ??
+      process.env.NEXT_PUBLIC_APP_URL ??
+      "http://localhost:3000",
+  },
 });
 
 export default auth;

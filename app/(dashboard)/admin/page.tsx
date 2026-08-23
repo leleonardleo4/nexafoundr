@@ -1,48 +1,15 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { ChatRequestsTable } from "@/components/admin/chat-requests-table";
 import { PendingStartupsTable } from "@/components/admin/pending-startups-table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
 
-async function getAdminUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "ADMIN") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user;
-}
-
 export default async function AdminDashboardPage() {
-  const user = await getAdminUser();
+  const user = await requireDashboardSessionUser("ADMIN");
 
   const pendingStartups = await prisma.startup.findMany({
     where: {
@@ -119,22 +86,22 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
+      <section className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-sm">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
+            <p className="text-sm uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
               Admin control center
             </p>
-            <h1 className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
+            <h1 className="mt-2 text-3xl font-semibold text-[color:var(--foreground)]">
               Manage verification and chat access, {user.name}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mt-2 max-w-2xl text-sm text-[color:var(--muted-foreground)]">
               Keep startup approvals moving and control investor chat requests before
               they become active conversations.
             </p>
           </div>
 
-          <Button asChild className="w-fit bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200">
+          <Button asChild className="w-fit">
             <Link href="#chat-requests">Jump to chat requests</Link>
           </Button>
         </div>
@@ -155,7 +122,7 @@ export default async function AdminDashboardPage() {
           {
             label: "Active conversations",
             value: activeChats.toString(),
-            tone: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300",
+            tone: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-300",
           },
         ].map((item) => (
           <Card key={item.label}>
@@ -211,12 +178,12 @@ export default async function AdminDashboardPage() {
           ].map((item) => (
             <div
               key={item.label}
-              className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/50"
+              className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4"
             >
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
+              <p className="text-xs uppercase tracking-[0.2em] text-[color:var(--muted-foreground)]">
                 {item.label}
               </p>
-              <p className="mt-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-50">
+              <p className="mt-2 text-2xl font-semibold text-[color:var(--foreground)]">
                 {item.count}
               </p>
             </div>

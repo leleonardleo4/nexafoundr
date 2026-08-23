@@ -38,7 +38,7 @@ export function TableRow({
   return (
     <tr
       className={[
-        "border-b border-zinc-200 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900/60",
+        "border-b border-[color:var(--border)] transition-colors hover:bg-[color:var(--surface)]",
         className,
       ].join(" ")}
       {...props}
@@ -53,7 +53,7 @@ export function TableHead({
   return (
     <th
       className={[
-        "h-12 px-4 text-left align-middle font-medium text-zinc-500",
+        "h-12 px-4 text-left align-middle font-medium text-[color:var(--muted-foreground)]",
         className,
       ].join(" ")}
       {...props}
@@ -67,7 +67,7 @@ export function TableCell({
 }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
-      className={["p-4 align-middle text-zinc-700 dark:text-zinc-300", className].join(" ")}
+      className={["p-4 align-middle text-[color:var(--foreground)]", className].join(" ")}
       {...props}
     />
   );
@@ -78,6 +78,6 @@ export function TableCaption({
   ...props
 }: React.HTMLAttributes<HTMLTableCaptionElement>) {
   return (
-    <caption className={["mt-4 text-sm text-zinc-500", className].join(" ")} {...props} />
+    <caption className={["mt-4 text-sm text-[color:var(--muted-foreground)]", className].join(" ")} {...props} />
   );
 }

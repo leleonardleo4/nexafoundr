@@ -49,7 +49,7 @@ export function Sidebar({ role, open, onClose }: SidebarProps) {
 
   return (
     <>
-      <aside className="hidden h-screen w-72 shrink-0 border-r border-zinc-200 bg-white/90 px-5 py-6 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80 md:flex md:flex-col">
+      <aside className="hidden h-screen w-72 shrink-0 border-r border-[color:var(--border)] bg-[color:var(--surface)] px-5 py-6 backdrop-blur md:flex md:flex-col">
         <SidebarContent
           role={role}
           pathname={pathname}
@@ -62,17 +62,17 @@ export function Sidebar({ role, open, onClose }: SidebarProps) {
           <button
             type="button"
             aria-label="Close sidebar"
-            className="absolute inset-0 bg-zinc-950/50"
+            className="absolute inset-0 bg-slate-950/40"
             onClick={onClose}
           />
 
-          <aside className="relative z-50 h-full w-80 max-w-[85vw] border-r border-zinc-200 bg-white px-5 py-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950">
+          <aside className="relative z-50 h-full w-80 max-w-[85vw] border-r border-[color:var(--border)] bg-[color:var(--surface-strong)] px-5 py-6 shadow-2xl">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--muted-foreground)]">
                   nexafoundr
                 </p>
-                <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+                <h1 className="text-lg font-semibold text-[color:var(--foreground)]">
                   Dashboard
                 </h1>
               </div>
@@ -80,7 +80,7 @@ export function Sidebar({ role, open, onClose }: SidebarProps) {
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-zinc-200 text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-300"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[color:var(--border)] text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
                 aria-label="Close sidebar"
               >
                 <X className="h-5 w-5" />
@@ -115,10 +115,10 @@ function SidebarContent({ role, pathname, navigationItems, onNavigate }: Sidebar
   return (
     <>
       <div className="mb-8 space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[color:var(--muted-foreground)]">
           nexafoundr
         </p>
-        <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
+        <h1 className="text-lg font-semibold text-[color:var(--foreground)]">
           {role === "FOUNDER"
             ? "Founder Hub"
             : role === "INVESTOR"
@@ -141,8 +141,8 @@ function SidebarContent({ role, pathname, navigationItems, onNavigate }: Sidebar
               onClick={onNavigate}
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950"
-                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-50"
+                  ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
+                  : "text-[color:var(--foreground)] hover:bg-[color:var(--surface-strong)] hover:text-[color:var(--foreground)]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -152,11 +152,11 @@ function SidebarContent({ role, pathname, navigationItems, onNavigate }: Sidebar
         })}
       </nav>
 
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/60">
-        <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+      <div className="mt-6 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4">
+        <p className="text-sm font-medium text-[color:var(--foreground)]">
           Ready to grow?
         </p>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
           Track your startups, back founders, and manage opportunities.
         </p>
       </div>

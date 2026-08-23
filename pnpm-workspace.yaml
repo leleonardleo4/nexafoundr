@@ -9,3 +9,5 @@ allowBuilds:
   esbuild: true
   prisma: true
   utf-8-validate: true
+  '@reown/appkit': true
+  keccak: true

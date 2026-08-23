@@ -1,93 +1,90 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 
-import { WalletTestPanel } from "@/components/solana/wallet-test-panel";
-import { FounderWalletForm } from "@/components/settings/founder-wallet-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { auth } from "@/lib/auth";
-import { isDashboardRole } from "@/lib/utils";
-import { prisma } from "@/lib/prisma";
-
-async function getCurrentUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-      founderWalletAddress: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  return user;
-}
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
+import { getDisplayEmail } from "@/lib/utils";
+import { ProfileSettingsForm } from "@/components/settings/profile-settings-form";
 
 export default async function SettingsPage() {
-  const user = await getCurrentUser();
+  const user = await requireDashboardSessionUser();
 
   return (
     <div className="space-y-8">
-      <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
-        <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
+      <section className="rounded-3xl border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-sm">
+        <p className="text-sm uppercase tracking-[0.24em] text-[color:var(--muted-foreground)]">
           Settings
         </p>
-        <h1 className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
+        <h1 className="mt-2 text-3xl font-semibold text-[color:var(--foreground)]">
           Account settings
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 max-w-2xl text-sm text-[color:var(--muted-foreground)]">
           Manage profile details, wallet routing, and account security from one
           place.
         </p>
       </section>
 
-      {user.role === "FOUNDER" ? (
-        <Card>
-          <CardHeader>
-            <CardDescription>Founder wallet</CardDescription>
-            <CardTitle>Escrow routing address</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FounderWalletForm currentWalletAddress={user.founderWalletAddress} />
-          </CardContent>
-        </Card>
-      ) : null}
+      <section className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+          <Card className="border-[color:var(--border)] bg-[color:var(--surface)] shadow-sm">
+            <CardHeader>
+              <CardDescription>Profile</CardDescription>
+              <CardTitle>Update your avatar and display name</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfileSettingsForm key={user.id} user={user} />
+            </CardContent>
+          </Card>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        {[
-          {
-            title: "Profile",
-            description: "Update your display name, avatar, and bio.",
-          },
-          {
-            title: "Security",
-            description: "Review passwords, sessions, and access controls.",
-          },
-        ].map((item) => (
-          <article
-            key={item.title}
-            className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60"
-          >
-            <h2 className="text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-              {item.title}
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">{item.description}</p>
-          </article>
-        ))}
+        <div className="space-y-6">
+          <Card className="border-[color:var(--border)] bg-[color:var(--surface-strong)] shadow-sm">
+            <CardHeader>
+              <CardDescription>Account</CardDescription>
+              <CardTitle>Current account details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm text-[color:var(--muted-foreground)]">
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
+                <p className="text-xs uppercase tracking-[0.24em]">Email</p>
+                <p className="mt-2 break-all text-sm font-medium text-[color:var(--foreground)]">
+                  {getDisplayEmail(user.email)}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
+                <p className="text-xs uppercase tracking-[0.24em]">Role</p>
+                <p className="mt-2 text-sm font-medium text-[color:var(--foreground)]">
+                  {user.role}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4">
+                <p className="text-xs uppercase tracking-[0.24em]">Signed in wallet</p>
+                <p className="mt-2 break-all text-sm font-medium text-[color:var(--foreground)]">
+                  {user.founderWalletAddress ?? "Not connected"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[color:var(--border)] bg-[color:var(--surface-strong)] shadow-sm">
+            <CardHeader>
+              <CardDescription>Wallet</CardDescription>
+              <CardTitle>Manage your connected wallet</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-[color:var(--muted-foreground)]">
+                Reconnect Phantom or switch social accounts from the login screen whenever
+                you need a fresh session.
+              </p>
+
+              <Link
+                href="/login"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-[color:var(--primary)] px-4 text-sm font-medium text-[color:var(--primary-foreground)] transition-colors hover:bg-[color:var(--primary-hover)]"
+              >
+                Open login
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
       </section>
-
-      <WalletTestPanel />
     </div>
   );
 }

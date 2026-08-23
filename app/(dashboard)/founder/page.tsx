@@ -1,49 +1,16 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import { StartupVerificationForm } from "@/components/founder/startup-verification-form";
 import { ConnectionRequestsSection } from "@/components/founder/connection-requests-section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { auth } from "@/lib/auth";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { formatSolAmount } from "@/lib/funding";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
-async function getFounderUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      name: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "FOUNDER") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user;
-}
-
 export default async function FounderDashboardPage() {
-  const user = await getFounderUser();
+  const user = await requireDashboardSessionUser("FOUNDER");
 
   const startups = await prisma.startup.findMany({
     where: {
@@ -134,15 +101,15 @@ export default async function FounderDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60 lg:flex-row lg:items-end lg:justify-between">
+      <section className="flex flex-col gap-4 rounded-3xl border border-[color:var(--border)] bg-[color:var(--surface)] p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.24em] text-zinc-500">
             Founder&apos;s Hub
           </p>
-          <h1 className="mt-2 text-3xl font-semibold text-zinc-950 dark:text-zinc-50">
+          <h1 className="mt-2 text-3xl font-semibold text-[color:var(--foreground)]">
             Welcome back, {user.name}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 max-w-2xl text-sm text-[color:var(--muted-foreground)]">
             Keep track of your startup pipeline, funding requests, and the
             investment activity around your listings.
           </p>
@@ -184,14 +151,14 @@ export default async function FounderDashboardPage() {
               {activeConversations.map((conversation) => (
                 <div
                   key={conversation.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800 lg:flex-row lg:items-center lg:justify-between"
+                  className="flex flex-col gap-4 rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4 lg:flex-row lg:items-center lg:justify-between"
                 >
                   <div className="space-y-1">
-                    <p className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+                    <p className="text-base font-semibold text-[color:var(--foreground)]">
                       {conversation.startup?.name ?? "Direct conversation"}
                     </p>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                      Investor: {conversation.investor.name} · {conversation.investor.email}
+                    <p className="text-sm text-[color:var(--muted-foreground)]">
+                      Investor: {conversation.investor.name} Â· {conversation.investor.email}
                     </p>
                   </div>
 
@@ -202,8 +169,8 @@ export default async function FounderDashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-700">
-              <p className="text-sm text-zinc-500">
+            <div className="rounded-2xl border border-dashed border-[color:var(--border)] p-6 text-center">
+              <p className="text-sm text-[color:var(--muted-foreground)]">
                 No active conversations yet.
               </p>
             </div>
@@ -222,7 +189,7 @@ export default async function FounderDashboardPage() {
             {[
               {
                 label: "Total Funding Requested",
-                value: `NGN ${totalFundingRequested.toLocaleString()}`,
+                value: `USD ${totalFundingRequested.toLocaleString()}`,
                 description: "Combined capital target across all of your startups.",
               },
               {
@@ -290,7 +257,7 @@ export default async function FounderDashboardPage() {
                       </span>
                     </div>
                     <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                      Funding requested: NGN {startup.fundingRequired.toLocaleString()}
+                      Funding requested: USD {startup.fundingRequired.toLocaleString()}
                     </p>
                   </article>
                 ))
@@ -308,4 +275,3 @@ export default async function FounderDashboardPage() {
     </div>
   );
 }
-

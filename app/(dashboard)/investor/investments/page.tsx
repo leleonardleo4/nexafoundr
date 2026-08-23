@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,74 +11,44 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
 import { MilestoneApprovalList } from "@/components/solana/milestone-approval-list";
 import { ProjectOverview } from "@/components/investor/project-overview";
 
-async function getInvestorUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "INVESTOR") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user;
-}
-
 export default async function InvestorInvestmentsPage() {
-  const user = await getInvestorUser();
+  const user = await requireDashboardSessionUser("INVESTOR");
 
   const investments = await prisma.investment.findMany({
     where: {
       investorId: user.id,
     },
     include: {
-        startup: {
-          select: {
-            id: true,
-            name: true,
-            industry: true,
-            stage: true,
-            fundingRequired: true,
-          },
-        },
-        milestones: {
-          orderBy: {
-            createdAt: "asc",
-          },
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            amountLamports: true,
-            status: true,
-            dueDate: true,
-            approvedAt: true,
-            releasedAt: true,
-          },
+      startup: {
+        select: {
+          id: true,
+          name: true,
+          industry: true,
+          stage: true,
+          fundingRequired: true,
         },
       },
+      milestones: {
+        orderBy: {
+          createdAt: "asc",
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          amountLamports: true,
+          status: true,
+          dueDate: true,
+          approvedAt: true,
+          releasedAt: true,
+        },
+      },
+    },
     orderBy: {
       id: "desc",
     },
@@ -116,7 +84,7 @@ export default async function InvestorInvestmentsPage() {
         <Card>
           <CardHeader>
             <CardDescription>Total capital committed</CardDescription>
-            <CardTitle>NGN {totalCommitted.toLocaleString()}</CardTitle>
+            <CardTitle>USD {totalCommitted.toLocaleString()}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -153,7 +121,7 @@ export default async function InvestorInvestmentsPage() {
                     <TableCell>
                       {investment.startup.industry} | {investment.startup.stage}
                     </TableCell>
-                    <TableCell>NGN {investment.amount.toLocaleString()}</TableCell>
+                    <TableCell>USD {investment.amount.toLocaleString()}</TableCell>
                     <TableCell>
                       <Badge>{investment.status}</Badge>
                     </TableCell>

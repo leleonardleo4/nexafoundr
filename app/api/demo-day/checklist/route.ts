@@ -1,33 +1,19 @@
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 
-import { auth } from "@/lib/auth";
+import { getDashboardSessionUser } from "@/lib/dashboard-session";
 import { buildDemoDayChecklistSnapshot } from "@/lib/demo-day-state";
-import { prisma } from "@/lib/prisma";
-import { isDashboardRole } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
-    const requestHeaders = await headers();
-    const session = await auth.api.getSession({ headers: requestHeaders });
+    const user = await getDashboardSessionUser();
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
-      select: {
-        id: true,
-        role: true,
-      },
-    });
-
-    if (!user || !isDashboardRole(user.role) || user.role !== "INVESTOR") {
+    if (user.role !== "INVESTOR") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

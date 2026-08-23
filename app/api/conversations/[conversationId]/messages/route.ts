@@ -1,9 +1,7 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
+import { getDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
-import { isDashboardRole } from "@/lib/utils";
 
 type ConversationMessagesRouteContext = {
   params: Promise<{
@@ -15,25 +13,10 @@ export async function GET(
   _request: Request,
   { params }: ConversationMessagesRouteContext,
 ) {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
+  const user = await getDashboardSessionUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { conversationId } = await params;

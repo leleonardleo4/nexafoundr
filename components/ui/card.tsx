@@ -7,7 +7,7 @@ export function Card({
   return (
     <div
       className={[
-        "rounded-3xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60",
+        "rounded-3xl border border-[color:var(--border)] bg-[color:var(--surface)] shadow-[0_18px_60px_-34px_rgba(15,23,42,0.35)] backdrop-blur",
         className,
       ].join(" ")}
       {...props}
@@ -43,7 +43,7 @@ export function CardTitle({
   return (
     <h3
       className={[
-        "text-lg font-semibold text-zinc-950 dark:text-zinc-50",
+        "text-lg font-semibold text-[color:var(--foreground)]",
         className,
       ].join(" ")}
       {...props}
@@ -55,5 +55,5 @@ export function CardDescription({
   className = "",
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={["text-sm text-zinc-500", className].join(" ")} {...props} />;
+  return <p className={["text-sm text-[color:var(--muted-foreground)]", className].join(" ")} {...props} />;
 }

@@ -1,46 +1,13 @@
 import Link from "next/link";
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { InvestNowForm } from "@/components/investments/invest-now-form";
 import { ConnectionRequestCard } from "@/components/investor/connection-request-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { auth } from "@/lib/auth";
-import { getDashboardPath, isDashboardRole } from "@/lib/utils";
+import { requireDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
-
-async function getInvestorUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    redirect("/");
-  }
-
-  if (user.role !== "INVESTOR") {
-    redirect(getDashboardPath(user.role));
-  }
-
-  return user as typeof user & {
-    role: "INVESTOR";
-  };
-}
 
 type StartupDetailPageProps = {
   params: Promise<{
@@ -49,7 +16,7 @@ type StartupDetailPageProps = {
 };
 
 export default async function StartupDetailPage({ params }: StartupDetailPageProps) {
-  const investor = await getInvestorUser();
+  const investor = await requireDashboardSessionUser("INVESTOR");
   const { id } = await params;
 
   const startup = await prisma.startup.findUnique({
@@ -158,7 +125,7 @@ export default async function StartupDetailPage({ params }: StartupDetailPagePro
                   Funding Goal
                 </p>
                 <p className="mt-2 text-lg font-semibold text-zinc-950 dark:text-zinc-50">
-                  NGN {startup.fundingRequired.toLocaleString()}
+                  USD {startup.fundingRequired.toLocaleString()}
                 </p>
               </div>
 
@@ -187,7 +154,7 @@ export default async function StartupDetailPage({ params }: StartupDetailPagePro
               <Badge
                 className={
                   startup.founder.founderWalletAddress
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    ? "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-300"
                     : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
                 }
               >

@@ -30,8 +30,9 @@ async function uploadToLocalStorage(
   const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]+/g, "-") || "upload";
   const fileExtension = path.extname(safeFileName);
   const baseName = path.basename(safeFileName, fileExtension);
+  const safePrefix = publicIdPrefix?.replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "");
   const finalFileName = [
-    publicIdPrefix?.trim() || "document",
+    safePrefix || "document",
     baseName,
     randomUUID(),
   ]

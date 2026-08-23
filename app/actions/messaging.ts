@@ -1,33 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { ConversationStatus } from "@prisma/client";
 
-import { auth } from "@/lib/auth";
+import { getDashboardSessionUser } from "@/lib/dashboard-session";
 import { prisma } from "@/lib/prisma";
-import { isDashboardRole } from "@/lib/utils";
 
 async function getCurrentDashboardUser() {
-  const requestHeaders = await headers();
-  const session = await auth.api.getSession({ headers: requestHeaders });
+  const user = await getDashboardSessionUser();
 
-  if (!session) {
+  if (!user) {
     throw new Error("You must be signed in to use messaging.");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id,
-    },
-    select: {
-      id: true,
-      role: true,
-    },
-  });
-
-  if (!user || !isDashboardRole(user.role)) {
-    throw new Error("You do not have access to messaging.");
   }
 
   return user;

@@ -71,13 +71,13 @@ function formatDayLabel(value: Date | string) {
 function getStatusTone(status: ConversationRoomProps["conversationStatus"]) {
   switch (status) {
     case "ACTIVE":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300";
+      return "border-[color:var(--primary)] bg-[color:var(--surface-strong)] text-[color:var(--primary)]";
     case "PENDING":
-      return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300";
+      return "border-[color:var(--accent)] bg-[color:var(--surface-strong)] text-[color:var(--accent)]";
     case "CLOSED":
-      return "border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
+      return "border-[color:var(--border)] bg-[color:var(--surface-strong)] text-[color:var(--muted-foreground)]";
     default:
-      return "border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
+      return "border-[color:var(--border)] bg-[color:var(--surface-strong)] text-[color:var(--muted-foreground)]";
   }
 }
 
@@ -181,9 +181,9 @@ export function ConversationRoom({
   }
 
   return (
-    <Card className="overflow-hidden border-zinc-200 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.08),_transparent_38%),linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(250,250,250,0.98))] shadow-xl dark:border-zinc-800 dark:bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.14),_transparent_42%),linear-gradient(180deg,_rgba(9,9,11,0.98),_rgba(9,9,11,0.98))]">
+    <Card className="overflow-hidden border-[color:var(--border)] bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.1),_transparent_38%),linear-gradient(180deg,_rgba(255,248,255,0.98),_rgba(244,239,255,0.98))] shadow-xl">
       <div className="flex h-full min-h-[72vh] flex-col">
-        <CardHeader className="sticky top-0 z-20 border-b border-zinc-200 bg-white/80 px-5 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80 sm:px-6">
+        <CardHeader className="sticky top-0 z-20 border-b border-[color:var(--border)] bg-[color:var(--surface-strong)] px-5 py-4 backdrop-blur sm:px-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -191,28 +191,28 @@ export function ConversationRoom({
                 <Badge className={getStatusTone(conversationStatus)}>{conversationStatus}</Badge>
               </div>
               <CardTitle className="text-2xl leading-tight sm:text-3xl">{title}</CardTitle>
-              <p className="max-w-2xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+              <p className="max-w-2xl text-sm leading-6 text-[color:var(--muted-foreground)]">
                 {description}
               </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[18rem]">
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-zinc-500">
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">
                   <Sparkles className="h-3.5 w-3.5" />
                   Thread
                 </div>
-                <p className="mt-2 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                <p className="mt-2 text-sm font-medium text-[color:var(--foreground)]">
                   {messages.length} message{messages.length === 1 ? "" : "s"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-zinc-500">
+              <div className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-4">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Safety
                 </div>
-                <p className="mt-2 text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                <p className="mt-2 text-sm font-medium text-[color:var(--foreground)]">
                   {canSend ? "Live chat enabled" : "Waiting for approval"}
                 </p>
               </div>
@@ -227,7 +227,7 @@ export function ConversationRoom({
                 groupedMessages.map((group) => (
                   <div key={group.key} className="space-y-4">
                     <div className="flex items-center justify-center">
-                      <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+                      <span className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-3 py-1 text-xs font-medium text-[color:var(--muted-foreground)] shadow-sm">
                         {group.label}
                       </span>
                     </div>
@@ -245,7 +245,7 @@ export function ConversationRoom({
                             ].join(" ")}
                           >
                             {!isCurrentUser ? (
-                              <div className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                              <div className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--surface-strong)] text-xs font-semibold text-[color:var(--foreground)]">
                                 {message.sender.name
                                   .split(" ")
                                   .map((part) => part[0])
@@ -259,8 +259,8 @@ export function ConversationRoom({
                               className={[
                                 "max-w-[88%] rounded-[1.35rem] px-4 py-3 shadow-sm sm:max-w-[74%]",
                                 isCurrentUser
-                                  ? "rounded-br-md bg-emerald-600 text-white"
-                                  : "rounded-bl-md border border-zinc-200 bg-white text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50",
+                                  ? "rounded-br-md bg-[color:var(--primary)] text-[color:var(--primary-foreground)]"
+                                  : "rounded-bl-md border border-[color:var(--border)] bg-[color:var(--surface-strong)] text-[color:var(--foreground)]",
                               ].join(" ")}
                             >
                               <div className="flex items-center justify-between gap-4">
@@ -269,10 +269,10 @@ export function ConversationRoom({
                                 </p>
                                 <p
                                   className={[
-                                    "text-[11px]",
-                                    isCurrentUser
-                                      ? "text-emerald-100"
-                                      : "text-zinc-500 dark:text-zinc-400",
+                                  "text-[11px]",
+                                  isCurrentUser
+                                      ? "text-[color:var(--primary-foreground)]/80"
+                                      : "text-[color:var(--muted-foreground)]",
                                   ].join(" ")}
                                 >
                                   {formatTime(message.createdAt)}
@@ -284,7 +284,7 @@ export function ConversationRoom({
                               </p>
 
                               {isCurrentUser ? (
-                                <div className="mt-3 flex items-center justify-end gap-1.5 text-[11px] text-emerald-100">
+                                <div className="mt-3 flex items-center justify-end gap-1.5 text-[11px] text-[color:var(--primary-foreground)]/80">
                                   <CheckCheck className="h-3.5 w-3.5" />
                                   <span>Sent</span>
                                 </div>
@@ -297,15 +297,15 @@ export function ConversationRoom({
                   </div>
                 ))
               ) : (
-                <div className="flex h-full min-h-[18rem] items-center justify-center rounded-[1.75rem] border border-dashed border-zinc-300 bg-white/60 p-8 text-center dark:border-zinc-700 dark:bg-zinc-950/40">
+                <div className="flex h-full min-h-[18rem] items-center justify-center rounded-[1.75rem] border border-dashed border-[color:var(--border)] bg-[color:var(--surface-strong)] p-8 text-center">
                   <div className="max-w-sm space-y-3">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--surface-strong)] text-[color:var(--primary)]">
                       <Sparkles className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-medium text-zinc-950 dark:text-zinc-50">
+                    <p className="text-sm font-medium text-[color:var(--foreground)]">
                       No messages yet
                     </p>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <p className="text-sm text-[color:var(--muted-foreground)]">
                       Once the founder approves the request, the conversation will open
                       like a live chat thread.
                     </p>
@@ -317,12 +317,12 @@ export function ConversationRoom({
           </div>
 
           <form
-            className="sticky bottom-0 z-20 mt-4 rounded-[1.75rem] border border-zinc-200 bg-white/90 p-3 shadow-lg backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90 sm:p-4"
+            className="sticky bottom-0 z-20 mt-4 rounded-[1.75rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-3 shadow-lg backdrop-blur sm:p-4"
             onSubmit={handleSubmit}
           >
             <div className="flex flex-col gap-3">
               <label
-                className="sr-only text-sm font-medium text-zinc-950 dark:text-zinc-50"
+                className="sr-only text-sm font-medium text-[color:var(--foreground)]"
                 htmlFor="conversation-message"
               >
                 Write a message
@@ -340,11 +340,11 @@ export function ConversationRoom({
                     ? "Type a message... use Shift + Enter for a new line"
                     : "This conversation is not active yet."
                 }
-                className="min-h-[84px] w-full resize-none rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm outline-none transition placeholder:text-zinc-400 focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-900 dark:placeholder:text-zinc-500"
+                className="min-h-[84px] w-full resize-none rounded-[1.25rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] px-4 py-3 text-sm outline-none transition placeholder:text-[color:var(--muted-foreground)] focus:border-[color:var(--primary)] disabled:cursor-not-allowed disabled:opacity-60"
               />
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs leading-5 text-[color:var(--muted-foreground)]">
                   {canSend
                     ? "Messages are delivered only after the request is active."
                     : "Read-only until the founder accepts the conversation request."}
@@ -353,7 +353,7 @@ export function ConversationRoom({
                 <Button
                   type="submit"
                   disabled={!canSend || isSending || !draft.trim()}
-                  className="gap-2 rounded-full bg-emerald-600 px-5 text-white hover:bg-emerald-500 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+                  className="gap-2 rounded-full px-5"
                 >
                   {isSending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

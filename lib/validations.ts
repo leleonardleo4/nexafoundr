@@ -1,10 +1,39 @@
 import { z } from "zod";
 
+export const startupIndustries = [
+  "Fintech",
+  "Healthtech",
+  "Edtech",
+  "SaaS",
+  "E-commerce",
+  "Logistics",
+  "AgriTech",
+  "Energy",
+  "AI / ML",
+  "Consumer",
+  "Media",
+  "Other",
+] as const;
+
+export const startupStages = [
+  "Idea",
+  "Pre-seed",
+  "Seed",
+  "Series A",
+  "Series B",
+  "Growth",
+  "Profitability",
+] as const;
+
 export const startupSchema = z.object({
   name: z.string().trim().min(1, "Startup name is required."),
   description: z.string().trim().min(1, "Startup description is required."),
-  industry: z.string().trim().min(1, "Industry is required."),
-  stage: z.string().trim().min(1, "Stage is required."),
+  industry: z.enum(startupIndustries, {
+    error: "Select a valid industry.",
+  }),
+  stage: z.enum(startupStages, {
+    error: "Select a valid stage.",
+  }),
   fundingRequired: z.coerce
     .number()
     .positive("Funding required must be a positive number."),

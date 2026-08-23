@@ -42,7 +42,7 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return "Something went wrong while talking to Phantom.";
+  return "Something went wrong while talking to your wallet.";
 }
 
 export function WalletTestPanel() {
@@ -93,7 +93,7 @@ export function WalletTestPanel() {
 
     if (!walletReady || !publicKey || !signTransaction || !signAllTransactions) {
       toast({
-        title: "Connect Phantom first",
+        title: "Connect a wallet first",
         description: "Your wallet must be connected before sending a test transaction.",
         variant: "destructive",
       });
@@ -156,7 +156,7 @@ export function WalletTestPanel() {
       <CardHeader>
         <CardTitle>Solana connection test</CardTitle>
         <CardDescription>
-          Read your Phantom balance and send a 1-lamport devnet test transfer.
+          Read your wallet balance and send a 1-lamport devnet test transfer.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -16,6 +16,10 @@ export function isAdminRole(role: UserRole | null | undefined): role is AdminRol
   return role === "ADMIN";
 }
 
+export function getDisplayEmail(email: string) {
+  return email.endsWith("@privy.local") ? "Wallet account" : email;
+}
+
 export function getDashboardPath(role: DashboardRole) {
   if (role === "FOUNDER") {
     return "/founder";

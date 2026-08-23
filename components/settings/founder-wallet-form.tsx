@@ -27,7 +27,7 @@ export function FounderWalletForm({
     if (!publicKey) {
       toast({
         title: "Connect a wallet first",
-        description: "Use Phantom to populate your founder wallet automatically.",
+        description: "Use your connected Solana wallet to populate your founder wallet automatically.",
         variant: "destructive",
       });
       return;
@@ -65,7 +65,7 @@ export function FounderWalletForm({
       <div className="space-y-2">
         <label
           htmlFor="founderWalletAddress"
-          className="text-sm font-medium text-zinc-950 dark:text-zinc-50"
+          className="text-sm font-medium text-[color:var(--foreground)]"
         >
           Founder wallet address
         </label>
@@ -84,7 +84,7 @@ export function FounderWalletForm({
           type="button"
           onClick={fillFromConnectedWallet}
           disabled={!connected && !publicKey}
-          className="border border-zinc-200 bg-white text-zinc-950 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900"
+          className="border border-[color:var(--border)] bg-[color:var(--surface-strong)] text-[color:var(--foreground)] hover:bg-[color:var(--surface)]"
         >
           Use connected wallet
         </Button>
